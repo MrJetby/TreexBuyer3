@@ -1,0 +1,15 @@
+name: TreexBuyer
+version: '1.0'
+main: me.jetby.treexBuyer.Main
+api-version: '1.18'
+load: STARTUP
+authors: [ MrJetby ]
+website: https://dsc.gg/treexstudio
+softdepend:
+  - PlaceholderAPI
+  - Vault
+commands:
+  treexbuyer:
+    aliases:
+      - tb
+      - tbuyer
