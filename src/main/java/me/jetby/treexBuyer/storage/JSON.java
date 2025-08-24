@@ -4,7 +4,6 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import me.jetby.treexBuyer.Main;
 import me.jetby.treexBuyer.tools.FileLoader;
-import me.jetby.treexBuyer.tools.JsonManager;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.json.simple.JSONArray;
@@ -17,7 +16,7 @@ import java.util.List;
 import java.util.TreeMap;
 import java.util.UUID;
 
-public class JSON implements Storage{
+public class JSON implements Storage {
 
 
     final File jsonFile = FileLoader.getFile("storage.json");
@@ -26,11 +25,12 @@ public class JSON implements Storage{
     private JSONParser parser = new JSONParser();
     private HashMap<String, Object> defaults = new HashMap<String, Object>();
 
-    @Override @SuppressWarnings("unchecked")
+    @Override
+    @SuppressWarnings("unchecked")
     public boolean load() {
 
 
-        Bukkit.getScheduler().runTaskAsynchronously(Main.getInstance( ), () -> {
+        Bukkit.getScheduler().runTaskAsynchronously(Main.getInstance(), () -> {
             try {
                 PrintWriter pw = new PrintWriter(jsonFile, "UTF-8");
                 pw.print("{");
@@ -101,6 +101,7 @@ public class JSON implements Storage{
             return false;
         }
     }
+
     public String getRawData(String key) {
         return json.containsKey(key) ? json.get(key).toString()
                 : (defaults.containsKey(key) ? defaults.get(key).toString() : key);
@@ -117,14 +118,16 @@ public class JSON implements Storage{
     public double getDouble(String key) {
         try {
             return Double.parseDouble(getRawData(key));
-        } catch (Exception ex) { }
+        } catch (Exception ex) {
+        }
         return -1;
     }
 
     public double getInteger(String key) {
         try {
             return Integer.parseInt(getRawData(key));
-        } catch (Exception ex) { }
+        } catch (Exception ex) {
+        }
         return -1;
     }
 
@@ -137,6 +140,7 @@ public class JSON implements Storage{
         return json.containsKey(key) ? (JSONArray) json.get(key)
                 : (defaults.containsKey(key) ? (JSONArray) defaults.get(key) : new JSONArray());
     }
+
     @Override
     public String type() {
         return "JSON";

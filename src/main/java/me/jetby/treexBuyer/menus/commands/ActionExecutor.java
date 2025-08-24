@@ -11,12 +11,12 @@ import java.util.Map;
 @UtilityClass
 public class ActionExecutor {
     public void execute(Player player, Map<ActionType, List<String>> actions, Button button) {
-            actions.keySet().forEach(type -> {
-                var contexts = actions.get(type);
-                for (String context : contexts) {
-                    var c = TextUtil.setPapi(player, TextUtil.colorize(context));
-                    type.getAction().execute(player, c, button);
-                }
-            });
+        actions.keySet().forEach(type -> {
+            var contexts = actions.get(type);
+            for (String context : contexts) {
+                var c = TextUtil.setPapi(player, TextUtil.colorize(context));
+                type.getAction().execute(player, c, button);
+            }
+        });
     }
 }

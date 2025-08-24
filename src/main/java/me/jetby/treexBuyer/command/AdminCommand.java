@@ -9,7 +9,6 @@ import me.jetby.treexBuyer.storage.Storage;
 import me.jetby.treexBuyer.storage.Yaml;
 import me.jetby.treexBuyer.tools.TextUtil;
 import org.bukkit.Bukkit;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -22,6 +21,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.logging.Level;
 import java.util.stream.Collectors;
 
 
@@ -31,7 +31,7 @@ public class AdminCommand implements CommandExecutor, TabCompleter {
 
     public AdminCommand(Main plugin) {
         this.plugin = plugin;
-        this.storage = plugin.getStorage( );
+        this.storage = plugin.getStorage();
     }
 
     @Override
@@ -45,7 +45,7 @@ public class AdminCommand implements CommandExecutor, TabCompleter {
                 sender.sendMessage("Команда доступна только игрокам.");
                 return true;
             }
-            new JGui(plugin.getMenuLoader( ).getMenus( ).get(args[1]), plugin, player).open(player);
+            new JGui(plugin.getMenuLoader().getMenus().get(args[1]), plugin, player).open(player);
         }
 
         switch (args[0]) {
@@ -56,11 +56,11 @@ public class AdminCommand implements CommandExecutor, TabCompleter {
                 }
                 if (sender instanceof Player player) {
                     if (args.length == 2) {
-                        new JGui(plugin.getMenuLoader( ).getMenus( ).get(args[1]), plugin, player).open(player);
+                        new JGui(plugin.getMenuLoader().getMenus().get(args[1]), plugin, player).open(player);
                     } else {
                         Player target = Bukkit.getPlayer(args[2]);
                         if (target != null) {
-                            new JGui(plugin.getMenuLoader( ).getMenus( ).get(args[1]), plugin, Bukkit.getPlayer(args[2])).open(target);
+                            new JGui(plugin.getMenuLoader().getMenus().get(args[1]), plugin, Bukkit.getPlayer(args[2])).open(target);
                         } else {
                             sender.sendMessage(TextUtil.colorize("&#EF473APlayer not found"));
                         }
@@ -68,7 +68,7 @@ public class AdminCommand implements CommandExecutor, TabCompleter {
                 } else {
                     Player target = Bukkit.getPlayer(args[2]);
                     if (target != null) {
-                        new JGui(plugin.getMenuLoader( ).getMenus( ).get(args[1]), plugin, Bukkit.getPlayer(args[2])).open(target);
+                        new JGui(plugin.getMenuLoader().getMenus().get(args[1]), plugin, Bukkit.getPlayer(args[2])).open(target);
                     } else {
                         sender.sendMessage(TextUtil.colorize("&#EF473APlayer not found"));
                     }
@@ -76,7 +76,7 @@ public class AdminCommand implements CommandExecutor, TabCompleter {
                 break;
             }
             case "reload": {
-                sender.sendMessage(TextUtil.colorize("&#82FB16Successfully reloaded, took only " + reload( ) + " ms."));
+                sender.sendMessage(TextUtil.colorize("&#82FB16Successfully reloaded, took only " + reload() + " ms."));
                 break;
             }
             case "score": {
@@ -100,8 +100,8 @@ public class AdminCommand implements CommandExecutor, TabCompleter {
                             int score = storage.getScore(offlinePlayer);
                             storage.setScore(offlinePlayer, score + amount);
                         } else {
-                            int score = storage.getScore(target.getUniqueId( ));
-                            storage.setScore(target.getUniqueId( ), score + amount);
+                            int score = storage.getScore(target.getUniqueId());
+                            storage.setScore(target.getUniqueId(), score + amount);
                         }
 
                         sender.sendMessage(TextUtil.colorize("&#82FB16Successfully given " + amount + " scores to " + args[2]));
@@ -125,14 +125,14 @@ public class AdminCommand implements CommandExecutor, TabCompleter {
                             String string = "OfflinePlayer:" + args[2];
                             UUID offlinePlayer = UUID.nameUUIDFromBytes(string.getBytes(StandardCharsets.UTF_8));
                             int score = storage.getScore(offlinePlayer);
-                            if (score>=amount) {
+                            if (score >= amount) {
                                 storage.setScore(offlinePlayer, score - amount);
                             } else {
                                 storage.setScore(offlinePlayer, 0);
                             }
                         } else {
-                            int score = storage.getScore(target.getUniqueId( ));
-                            if (score>=amount) {
+                            int score = storage.getScore(target.getUniqueId());
+                            if (score >= amount) {
                                 storage.setScore(target.getUniqueId(), score - amount);
                             } else {
                                 storage.setScore(target.getUniqueId(), 0);
@@ -177,53 +177,53 @@ public class AdminCommand implements CommandExecutor, TabCompleter {
     }
 
     private long reload() {
-        long start = System.currentTimeMillis( );
+        long start = System.currentTimeMillis();
         try {
             try {
                 storage.save(true);
             } catch (Exception e) {
-                return System.currentTimeMillis( ) - start;
+                return System.currentTimeMillis() - start;
             }
 
-                plugin.getCfg( ).load( );
+            plugin.getCfg().load();
 
-                switch (plugin.getCfg( ).getStorageType( )) {
-                    case "MYSQL", "SQLITE":
-                        plugin.setStorage(new SQL(plugin));
-                        break;
-                    case "JSON":
-                        plugin.setStorage(new JSON( ));
-                        break;
-                    default:
-                        plugin.setStorage(new Yaml(plugin));
+            switch (plugin.getCfg().getStorageType()) {
+                case "MYSQL", "SQLITE":
+                    plugin.setStorage(new SQL(plugin));
+                    break;
+                case "JSON":
+                    plugin.setStorage(new JSON());
+                    break;
+                default:
+                    plugin.setStorage(new Yaml(plugin));
 
-                }
-                storage.load( );
+            }
+            storage.load();
 
-                plugin.getItems( ).load( );
-                plugin.getMenuLoader( ).load( );
+            plugin.getItems().load();
+            plugin.getMenuLoader().load();
 
-                plugin.getAutoBuy( ).stop( );
-                plugin.getAutoBuy( ).start( );
+            plugin.getAutoBuy().stop();
+            plugin.getAutoBuy().start();
 
 
-                CommandRegistrar.unregisterAll(plugin);
-                CommandRegistrar.createCommands(plugin);
+            CommandRegistrar.unregisterAll(plugin);
+            CommandRegistrar.createCommands(plugin);
 
 
         } catch (Exception ex) {
-            ex.printStackTrace( );
+            plugin.getLogger().log(Level.WARNING, "Error with config reloading", ex);
         }
 
-        return System.currentTimeMillis( ) - start;
+        return System.currentTimeMillis() - start;
     }
 
-    static final List<String> completions = new ArrayList<>( );
+    static final List<String> completions = new ArrayList<>();
 
     @Override
     public @Nullable List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String s, @NotNull String[] args) {
         if (sender instanceof Player player) {
-            completions.clear( );
+            completions.clear();
 
             if (args.length == 1) {
                 completions.add("open");
@@ -233,7 +233,7 @@ public class AdminCommand implements CommandExecutor, TabCompleter {
 
             if (args.length == 2 && args[0].equalsIgnoreCase("open")) {
                 if (player.hasPermission("treexbuyer.admin")) {
-                    completions.addAll(plugin.getMenuLoader( ).getMenus( ).keySet());
+                    completions.addAll(plugin.getMenuLoader().getMenus().keySet());
                 }
             }
             if (args.length == 2 && args[0].equalsIgnoreCase("score")) {
@@ -245,8 +245,8 @@ public class AdminCommand implements CommandExecutor, TabCompleter {
             }
         }
 
-        return completions.stream( )
-                .filter(menuId -> menuId.toLowerCase( ).startsWith(args[args.length-1].toLowerCase( )))
-                .collect(Collectors.toList( ));
+        return completions.stream()
+                .filter(menuId -> menuId.toLowerCase().startsWith(args[args.length - 1].toLowerCase()))
+                .collect(Collectors.toList());
     }
 }

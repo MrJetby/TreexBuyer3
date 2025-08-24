@@ -32,30 +32,30 @@ public class Manager {
 
     public String check(boolean status) {
         if (status) {
-            return Main.getInstance().getCfg( ).getEnable( );
+            return Main.getInstance().getCfg().getEnable();
         }
-        return Main.getInstance().getCfg( ).getDisable( );
+        return Main.getInstance().getCfg().getDisable();
     }
 
-    public AdvancedGuiClickHandler getClickHandler(Button button, Player player, double totalPrice, int totalScores, Main plugin    ) {
+    public AdvancedGuiClickHandler getClickHandler(Button button, Player player, double totalPrice, int totalScores, Main plugin) {
         AdvancedGuiClickHandler advancedGuiClickHandler = (event, controller) -> {
 
             event.setCancelled(true);
 
-            ClickType clickType = event.getClick( );
+            ClickType clickType = event.getClick();
 
-            Logger.warn("При клике из класса JGui цена: "+df.format(totalPrice));
+            Logger.warn("При клике из класса JGui цена: " + df.format(totalPrice));
 
-            for (Command cmd : button.commands( )) {
-                if (cmd.clickType( ) == clickType || cmd.anyClick( )) {
+            for (Command cmd : button.commands()) {
+                if (cmd.clickType() == clickType || cmd.anyClick()) {
 
                     boolean allRequirementsPassed = true;
-                    if (!cmd.requirements( ).isEmpty( )) {
-                        for (Requirements requirements : cmd.requirements( )) {
-                            if ((requirements.anyClick( ) || requirements.clickType( ) == clickType)) {
+                    if (!cmd.requirements().isEmpty()) {
+                        for (Requirements requirements : cmd.requirements()) {
+                            if ((requirements.anyClick() || requirements.clickType() == clickType)) {
                                 if (!ClickRequirement.check(
                                         player, requirements, totalPrice, totalScores, button)) {
-                                    ClickRequirement.runDenyCommands(player, requirements.deny_commands( ), button);
+                                    ClickRequirement.runDenyCommands(player, requirements.deny_commands(), button);
                                     allRequirementsPassed = false;
                                     break;
                                 }
@@ -64,12 +64,12 @@ public class Manager {
                     }
 
                     if (allRequirementsPassed) {
-                        List<String> list = new ArrayList<>(cmd.actions( ));
-                        if (plugin.getItems( ).getItemValues( ).containsKey(button.material())) {
-                            double price = plugin.getItems( ).getItemValues( ).get(button.material()).price( );
+                        List<String> list = new ArrayList<>(cmd.actions());
+                        if (plugin.getItems().getItemValues().containsKey(button.material())) {
+                            double price = plugin.getItems().getItemValues().get(button.material()).price();
                             list.replaceAll(s -> s.replace("%price%", df.format(price)));
-                            list.replaceAll(s -> s.replace("%price_with_coefficient%", String.valueOf(price * plugin.getCoefficient( ).get(player))));
-                            list.replaceAll(s -> s.replace("%auto_sell_toggle_state%", Manager.check(plugin.getStorage( ).getAutoBuyItems(player.getUniqueId( )).contains(button.material().name()))));
+                            list.replaceAll(s -> s.replace("%price_with_coefficient%", String.valueOf(price * plugin.getCoefficient().get(player))));
+                            list.replaceAll(s -> s.replace("%auto_sell_toggle_state%", Manager.check(plugin.getStorage().getAutoBuyItems(player.getUniqueId()).contains(button.material().name()))));
                         }
                         list.replaceAll(s -> s.replace("%sell_pay%", df.format(totalPrice)));
                         list.replaceAll(s -> s.replace("%sell_score%", df.format(totalScores)));
@@ -84,7 +84,7 @@ public class Manager {
 
     public void refreshMenu(Player player, JGui jGui) {
 
-        if (!player.getOpenInventory( ).getTopInventory( ).equals(jGui.inventory)) return;
+        if (!player.getOpenInventory().getTopInventory().equals(jGui.inventory)) return;
         jGui.runTask(() -> {
             jGui.setTotalPrice(0.0);
             jGui.totalScores = 0;
@@ -92,50 +92,53 @@ public class Manager {
             for (int i : jGui.sellZoneSlots) {
 
                 ItemStack itemStack = jGui.inventory.getItem(i);
-                if (itemStack == null || itemStack.getType( ).equals(Material.AIR)) continue;
+                if (itemStack == null || itemStack.getType().equals(Material.AIR)) continue;
                 if (!AutoBuy.isRegularItem(itemStack)) continue;
 
-                if (itemStack.getItemMeta( ).getPersistentDataContainer( ).has(NAMESPACED_KEY, PersistentDataType.STRING))
+                if (itemStack.getItemMeta().getPersistentDataContainer().has(NAMESPACED_KEY, PersistentDataType.STRING))
                     continue;
 
-                if (!jGui.plugin.getItems( ).getItemValues( ).containsKey(itemStack.getType( ))) continue;
-                Items.ItemData itemData = jGui.plugin.getItems( ).getItemValues( ).get(itemStack.getType( ));
+                if (!jGui.plugin.getItems().getItemValues().containsKey(itemStack.getType())) continue;
+                Items.ItemData itemData = jGui.plugin.getItems().getItemValues().get(itemStack.getType());
 
-                double price = itemData.price( ) * jGui.plugin.getCoefficient( ).get(player);
-                int score = itemData.score( );
+                double price = itemData.price() * jGui.plugin.getCoefficient().get(player);
+                int score = itemData.score();
 
 
                 jGui.setTotalPrice(jGui.getTotalPrice() + price * itemStack.getAmount());
-                jGui.totalScores += score * itemStack.getAmount( );
+                jGui.totalScores += score * itemStack.getAmount();
             }
 
-            for (Button button : jGui.menu.buttons( )) {
-                if (button.sellZone( )) continue;
+            for (Button button : jGui.menu.buttons()) {
+                if (button.sellZone()) continue;
 
-                jGui.getController(button.id( ) + button.slot( )).get( ).updateItems(wrapper -> {
-                    ItemStack itemStack = wrapper.itemStack( );
-                    if (itemStack.getType( ).equals(Material.AIR)) return;
-                    if (!itemStack.getItemMeta( ).getPersistentDataContainer( ).has(NAMESPACED_KEY, PersistentDataType.STRING)) {
+                jGui.getController(button.id() + button.slot()).get().updateItems(wrapper -> {
+                    ItemStack itemStack = wrapper.itemStack();
+                    if (itemStack.getType().equals(Material.AIR)) return;
+                    if (!itemStack.getItemMeta().getPersistentDataContainer().has(NAMESPACED_KEY, PersistentDataType.STRING)) {
                         return;
                     }
-                    ItemMeta itemMeta = itemStack.getItemMeta( );
-                    itemMeta.setDisplayName(button.displayName( ));
-                    itemMeta.setLore(button.lore( ));
+                    ItemMeta itemMeta = itemStack.getItemMeta();
+                    itemMeta.setDisplayName(button.displayName());
+                    itemMeta.setLore(button.lore());
 
 
-                    if (!button.commands( ).isEmpty( )) {
-                        for (Command command : button.commands( )) {
+                    if (!button.commands().isEmpty()) {
+                        for (Command command : button.commands()) {
                             boolean hasCmd = false;
                             for (String cmd : command.actions()) {
                                 if (cmd.startsWith("[AUTOBUY_ITEM_TOGGLE]") || cmd.startsWith("[SELL_ITEM]")) {
                                     hasCmd = true;
                                     break;
-                                };
+                                }
+                                ;
                             }
                             if (!hasCmd) continue;
-                            if (!jGui.plugin.getItems( ).getItemValues( ).containsKey(wrapper.itemStack( ).getType( ))) continue;
-                            if (!itemMeta.getPersistentDataContainer().get(NAMESPACED_KEY, PersistentDataType.STRING).equalsIgnoreCase("menu_priceItem")) continue;
-                            wrapper.enchanted(jGui.plugin.getStorage( ).getAutoBuyItems(player.getUniqueId( )).contains(wrapper.itemStack( ).getType( ).name( )));
+                            if (!jGui.plugin.getItems().getItemValues().containsKey(wrapper.itemStack().getType()))
+                                continue;
+                            if (!itemMeta.getPersistentDataContainer().get(NAMESPACED_KEY, PersistentDataType.STRING).equalsIgnoreCase("menu_priceItem"))
+                                continue;
+                            wrapper.enchanted(jGui.plugin.getStorage().getAutoBuyItems(player.getUniqueId()).contains(wrapper.itemStack().getType().name()));
 
                             break;
                         }
@@ -153,12 +156,12 @@ public class Manager {
         String input;
         if (cmd.startsWith("[AUTOBUY_ITEM_TOGGLE] ")) {
             input = cmd.replace("[AUTOBUY_ITEM_TOGGLE] ", "");
-        } else if (cmd.startsWith("[AUTOBUY_ITEM_TOGGLE]")){
+        } else if (cmd.startsWith("[AUTOBUY_ITEM_TOGGLE]")) {
             input = cmd.replace("[AUTOBUY_ITEM_TOGGLE]", "");
 
         } else if (cmd.startsWith("[SELL_ITEM] ")) {
             input = cmd.replace("[SELL_ITEM] ", "");
-        } else if (cmd.startsWith("[SELL_ITEM]")){
+        } else if (cmd.startsWith("[SELL_ITEM]")) {
             input = cmd.replace("[SELL_ITEM]", "");
 
         } else {

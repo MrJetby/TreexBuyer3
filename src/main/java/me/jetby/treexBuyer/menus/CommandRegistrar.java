@@ -8,6 +8,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Field;
 import java.util.*;
+import java.util.logging.Level;
 
 public class CommandRegistrar extends BukkitCommand implements CommandExecutor {
 
@@ -34,9 +35,7 @@ public class CommandRegistrar extends BukkitCommand implements CommandExecutor {
 
     public static void createCommands(Main plugin) {
         Map<String, List<String>> commands = new HashMap<>();
-        plugin.getMenuLoader().getMenus().forEach((key, item) -> {
-            commands.put(key, item.openCommands());
-        });
+        plugin.getMenuLoader().getMenus().forEach((key, item) -> commands.put(key, item.openCommands()));
 
         for (String menuId : commands.keySet()) {
             for (String command : commands.get(menuId)) {
@@ -60,19 +59,19 @@ public class CommandRegistrar extends BukkitCommand implements CommandExecutor {
 
             command.setAliases(Collections.emptyList());
 
-            unregisterCommand(commandName, commandMap);
+            unregisterCommand(plugin, commandName, commandMap);
 
-            commandMap.register(plugin.getDescription().getName(), command);
+            commandMap.register(plugin.getName(), command);
             registeredCommands.put(commandName.toLowerCase(), command);
 
         } catch (NoSuchFieldException | IllegalAccessException e) {
-            e.printStackTrace();
+            plugin.getLogger().log(Level.WARNING, "Error with command registration", e);
         }
     }
 
 
     @SuppressWarnings("unchecked")
-    private static void unregisterCommand(String commandName, CommandMap commandMap) {
+    private static void unregisterCommand(Main plugin, String commandName, CommandMap commandMap) {
         try {
             Field knownCommandsField;
             try {
@@ -90,7 +89,7 @@ public class CommandRegistrar extends BukkitCommand implements CommandExecutor {
             }
 
         } catch (Exception e) {
-            e.printStackTrace();
+            plugin.getLogger().log(Level.WARNING, "Error with command unregistration", e);
         }
     }
 
@@ -107,7 +106,7 @@ public class CommandRegistrar extends BukkitCommand implements CommandExecutor {
             registeredCommands.clear();
 
         } catch (Exception e) {
-            e.printStackTrace();
+            plugin.getLogger().log(Level.WARNING, "Error with commands unregistration", e);
         }
     }
 

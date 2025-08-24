@@ -16,12 +16,12 @@ public class TextUtil {
     private final char COLOR_CHAR = '§';
 
     public String setPapi(Player player, String text) {
-        if (text==null) return null;
+        if (text == null) return null;
         return PlaceholderAPI.setPlaceholders(player, text);
     }
 
     public List<String> setPapi(Player player, List<String> text) {
-        if (text==null) return null;
+        if (text == null) return null;
         return PlaceholderAPI.setPlaceholders(player, text);
     }
 

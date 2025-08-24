@@ -31,8 +31,7 @@ public class ClickRequirement {
         }
         if (requirements.type().equalsIgnoreCase("!string equals")) {
             return !requirements.input().equalsIgnoreCase(requirements.output());
-        }
-        else if (requirements.type().equalsIgnoreCase("javascript")) {
+        } else if (requirements.type().equalsIgnoreCase("javascript")) {
             String[] args = requirements.input().split(" ");
             if (args.length < 3) return false;
 
@@ -41,7 +40,7 @@ public class ClickRequirement {
                     .replace("%sell_score%", String.valueOf(totalScore))
                     .replace("%item_amount%", items(player, button))
             );
-            args[0] = TextUtil.setPapi( player, args[0]
+            args[0] = TextUtil.setPapi(player, args[0]
                     .replace("%sell_pay%", String.valueOf(totalPrice))
                     .replace("%sell_score%", String.valueOf(totalScore))
                     .replace("%item_amount%", items(player, button))
@@ -91,12 +90,12 @@ public class ClickRequirement {
     private static String items(Player player, Button button) {
         int amount = 0;
         try {
-           Material item = button.material( );
-                for (ItemStack itemStack : player.getInventory( ).getContents( )) {
-                    if (itemStack == null) continue;
-                    if (itemStack.getType( ) != item) continue;
-                    if (!isRegularItem(itemStack)) continue;
-                    amount += itemStack.getAmount( );
+            Material item = button.material();
+            for (ItemStack itemStack : player.getInventory().getContents()) {
+                if (itemStack == null) continue;
+                if (itemStack.getType() != item) continue;
+                if (!isRegularItem(itemStack)) continue;
+                amount += itemStack.getAmount();
             }
         } catch (Exception e) {
             amount = 0;

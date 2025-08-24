@@ -19,6 +19,7 @@ import me.jetby.treexBuyer.tools.Metrics;
 import me.jetby.treexBuyer.tools.TreexBuyerPlaceholders;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.NamespacedKey;
+import org.bukkit.command.PluginCommand;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -27,19 +28,19 @@ import java.text.DecimalFormat;
 @Getter
 public final class Main extends JavaPlugin {
 
-    final Loader menuLoader = new Loader(this, getDataFolder());
+    private final Loader menuLoader = new Loader(this, getDataFolder());
     public static final NamespacedKey NAMESPACED_KEY = new NamespacedKey("treexbuyer", "item");
     private Economy economy;
     @Getter
-    static Main instance;
-    Items items;
+    private static Main instance;
+    private Items items;
 
     @Setter
-    Storage storage;
-    Config cfg;
-    Coefficient coefficient;
-    AutoBuy autoBuy;
-    TreexBuyerPlaceholders treexBuyerPlaceholders;
+    private Storage storage;
+    private Config cfg;
+    private Coefficient coefficient;
+    private AutoBuy autoBuy;
+    private TreexBuyerPlaceholders treexBuyerPlaceholders;
 
     public static final DecimalFormat df = new DecimalFormat("#.##");
 
@@ -93,8 +94,9 @@ public final class Main extends JavaPlugin {
 
         CommandRegistrar.createCommands(this);
 
-        getCommand("treexbuyer").setExecutor(new AdminCommand(this));
-
+        PluginCommand treexbuyer = getCommand("treexbuyer");
+        if (treexbuyer != null)
+            treexbuyer.setExecutor(new AdminCommand(this));
     }
 
     private boolean setupEconomy() {
@@ -107,12 +109,13 @@ public final class Main extends JavaPlugin {
             return false;
         }
 
-        economy = rsp.getProvider();
-        return economy != null;
+        this.economy = rsp.getProvider();
+        return true;
     }
+
     @Override
     public void onDisable() {
-        if (treexBuyerPlaceholders!=null) {
+        if (treexBuyerPlaceholders != null) {
             if (treexBuyerPlaceholders.isRegistered()) {
                 treexBuyerPlaceholders.unregister();
             }
@@ -120,7 +123,7 @@ public final class Main extends JavaPlugin {
 
         CommandRegistrar.unregisterAll(this);
 
-        if (storage!=null) storage.save(false);
+        if (storage != null) storage.save(false);
 
     }
 }

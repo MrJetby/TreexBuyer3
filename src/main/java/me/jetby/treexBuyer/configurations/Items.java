@@ -11,13 +11,10 @@ import java.util.Map;
 @Getter
 public class Items {
 
-
     private final Map<Material, ItemData> itemValues = new HashMap<>();
 
     public void load() {
-
         FileConfiguration config = FileLoader.getFileConfiguration("priceItem.yml");
-
 
         for (String key : config.getKeys(false)) {
             double price = config.getDouble(key + ".price", 0);
@@ -26,6 +23,7 @@ public class Items {
         }
 
     }
+
     public record ItemData(double price, int score) {
     }
 }

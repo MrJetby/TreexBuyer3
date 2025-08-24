@@ -51,13 +51,16 @@ public class Loader {
         }
 
         File[] files = folder.listFiles();
-        for (File file : files) {
-            if (!file.getName().endsWith(".yml")) continue;
-            FileConfiguration config = YamlConfiguration.loadConfiguration(file);
-            loadMenu(config.getString("id", file.getName().replace(".yml", "")), file);
-            Logger.info("Меню Menu/"+config.getString("id")+".yml загружена");
+        if (files != null) {
+            for (File file : files) {
+                if (!file.getName().endsWith(".yml")) continue;
+                FileConfiguration config = YamlConfiguration.loadConfiguration(file);
+                loadMenu(config.getString("id", file.getName().replace(".yml", "")), file);
+                Logger.info("Меню Menu/" + config.getString("id") + ".yml загружена");
+            }
         }
     }
+
     private void loadMenu(String menuId, File file) {
 
         try {
@@ -187,6 +190,7 @@ public class Loader {
 
         return slots;
     }
+
     private List<Integer> parseSlotString(String slotString) {
         List<Integer> slots = new ArrayList<>();
         if (slotString.contains("-")) {

@@ -5,11 +5,12 @@ import me.jetby.treexBuyer.menus.commands.Action;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public class BroadcastMessageAction implements Action {
     @Override
-    public void execute(@NotNull Player player, String context, Button button) {
-        for (var p : Bukkit.getOnlinePlayers()) {
+    public void execute(@Nullable Player player, @NotNull String context, Button button) {
+        for (Player p : Bukkit.getOnlinePlayers()) {
             p.sendMessage(context);
         }
     }

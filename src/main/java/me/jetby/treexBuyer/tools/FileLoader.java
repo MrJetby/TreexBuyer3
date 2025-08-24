@@ -11,18 +11,18 @@ import java.io.File;
 public class FileLoader {
 
     public FileConfiguration getFileConfiguration(String fileName) {
-        File file = new File(Main.getInstance( ).getDataFolder( ).getAbsolutePath(), fileName);
-        if (!file.exists( )) {
-            Main.getInstance( ).saveResource(fileName, false);
+        File file = new File(Main.getInstance().getDataFolder().getAbsolutePath(), fileName);
+        if (!file.exists()) {
+            Main.getInstance().saveResource(fileName, false);
 
         }
         return YamlConfiguration.loadConfiguration(file);
     }
 
     public File getFile(String fileName) {
-        File file = new File(Main.getInstance( ).getDataFolder( ).getAbsoluteFile(), fileName);
-        if (!file.exists( )) {
-            Main.getInstance( ).saveResource(fileName, false);
+        File file = new File(Main.getInstance().getDataFolder().getAbsoluteFile(), fileName);
+        if (!file.exists()) {
+            Main.getInstance().saveResource(fileName, false);
         }
         return file;
     }

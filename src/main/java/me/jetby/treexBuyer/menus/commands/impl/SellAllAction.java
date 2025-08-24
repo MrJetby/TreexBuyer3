@@ -1,6 +1,5 @@
 package me.jetby.treexBuyer.menus.commands.impl;
 
-import lombok.RequiredArgsConstructor;
 import me.jetby.treexBuyer.Main;
 import me.jetby.treexBuyer.configurations.Items;
 import me.jetby.treexBuyer.menus.Button;
@@ -13,16 +12,16 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import static me.jetby.treexBuyer.Main.NAMESPACED_KEY;
 import static me.jetby.treexBuyer.functions.AutoBuy.isRegularItem;
 
-@RequiredArgsConstructor
-public class SellAllAction implements Action {
+public record SellAllAction(Main plugin) implements Action {
 
-    private final Main plugin;
     @Override
-    public void execute(@NotNull Player player, @NotNull String context, Button button) {
+    public void execute(@Nullable Player player, @NotNull String context, Button button) {
+        if (player == null) return;
 
         if (player.getGameMode().equals(GameMode.CREATIVE) && !player.hasPermission("treexbuyer.creative.bypass")) {
             return;
@@ -30,7 +29,7 @@ public class SellAllAction implements Action {
 
         Inventory inventory = player.getOpenInventory().getTopInventory();
 
-        if (inventory==plugin.getMenuLoader().getJGui().get(player.getUniqueId()).getInventory()) {
+        if (inventory == plugin.getMenuLoader().getJGui().get(player.getUniqueId()).getInventory()) {
             JGui jGui = plugin.getMenuLoader().getJGui().get(player.getUniqueId());
             double totalPrice = 0.0;
             int totalScores = 0;
@@ -38,13 +37,14 @@ public class SellAllAction implements Action {
 
                 ItemStack itemStack = inventory.getItem(i);
                 if (itemStack == null) continue;
-                if (itemStack.getItemMeta().getPersistentDataContainer().has(NAMESPACED_KEY, PersistentDataType.STRING)) continue;
+                if (itemStack.getItemMeta().getPersistentDataContainer().has(NAMESPACED_KEY, PersistentDataType.STRING))
+                    continue;
                 if (!isRegularItem(itemStack)) continue;
 
                 if (!plugin.getItems().getItemValues().containsKey(itemStack.getType())) continue;
                 Items.ItemData itemData = plugin.getItems().getItemValues().get(itemStack.getType());
 
-                double price = itemData.price()*plugin.getCoefficient().get(player);
+                double price = itemData.price() * plugin.getCoefficient().get(player);
                 int score = itemData.score();
 
                 inventory.setItem(i, null);
@@ -53,13 +53,13 @@ public class SellAllAction implements Action {
                 totalScores += score * itemStack.getAmount();
 
             }
-            if (totalPrice>0L) {
+            if (totalPrice > 0L) {
                 plugin.getEconomy().depositPlayer(player, totalPrice);
             }
-            if (totalScores>0) plugin.getStorage().setScore(player.getUniqueId(), plugin.getStorage().getScore(player.getUniqueId())+totalScores);
+            if (totalScores > 0)
+                plugin.getStorage().setScore(player.getUniqueId(), plugin.getStorage().getScore(player.getUniqueId()) + totalScores);
 
             Manager.refreshMenu(player, jGui);
-
 
 
         }

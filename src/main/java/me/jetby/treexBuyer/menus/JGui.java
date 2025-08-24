@@ -35,59 +35,59 @@ import static me.jetby.treexBuyer.Main.df;
 
 public class JGui extends AdvancedGui implements Listener {
 
-
     final Menu menu;
     @Getter
     Inventory inventory;
 
-
-    @Getter @Setter
+    @Getter
+    @Setter
     double totalPrice = 0.0;
-    @Getter @Setter
+    @Getter
+    @Setter
     int totalScores = 0;
 
-    final PlaceholderEngine mainPlaceholders = PlaceholderEngine.of( );
+    final PlaceholderEngine mainPlaceholders = PlaceholderEngine.of();
 
     @Getter
-    final List<Integer> sellZoneSlots = new ArrayList<>( );
+    final List<Integer> sellZoneSlots = new ArrayList<>();
     final Main plugin;
 
     public JGui(Menu menu, Main plugin, Player player) {
-        super(menu.size( ), menu.title( ));
+        super(menu.size(), menu.title());
         this.menu = menu;
         this.plugin = plugin;
-        Bukkit.getServer( ).getPluginManager().registerEvents(this, plugin);
+        Bukkit.getServer().getPluginManager().registerEvents(this, plugin);
 
         mainPlaceholders.register("%sell_pay%", (offlinePlayer) -> df.format(totalPrice));
         mainPlaceholders.register("%sell_score%", (offlinePlayer) -> df.format(totalScores));
         mainPlaceholders.register("%coefficient%", (offlinePlayer) -> {
-            if (offlinePlayer != null) return String.valueOf(plugin.getCoefficient( ).get(offlinePlayer.getPlayer( )));
+            if (offlinePlayer != null) return String.valueOf(plugin.getCoefficient().get(offlinePlayer.getPlayer()));
             return "";
         });
         mainPlaceholders.register("%global_auto_sell_toggle_state%", (offlinePlayer -> {
             if (offlinePlayer != null)
-                return Manager.check(plugin.getStorage( ).getAutoBuyStatus(offlinePlayer.getUniqueId( )));
+                return Manager.check(plugin.getStorage().getAutoBuyStatus(offlinePlayer.getUniqueId()));
             return "";
         }));
         mainPlaceholders.register("%score%", (offlinePlayer) -> {
             if (offlinePlayer != null)
-                return String.valueOf(plugin.getStorage( ).getScore(offlinePlayer.getPlayer( ).getUniqueId( )));
+                return String.valueOf(plugin.getStorage().getScore(offlinePlayer.getPlayer().getUniqueId()));
             return "";
         });
 
         onOpen(event -> {
-            plugin.getMenuLoader( ).getJGui( ).put(player.getUniqueId( ), this);
-            inventory = event.getInventory( );
+            plugin.getMenuLoader().getJGui().put(player.getUniqueId(), this);
+            inventory = event.getInventory();
             Manager.refreshMenu(player, this);
         });
 
         setCancelEmptySlots(false);
 
         onDrag(event -> {
-            Inventory top = event.getView( ).getTopInventory( );
+            Inventory top = event.getView().getTopInventory();
             if (top != inventory) return;
-            int topSize = top.getSize( );
-            for (int rawSlot : event.getRawSlots( )) {
+            int topSize = top.getSize();
+            for (int rawSlot : event.getRawSlots()) {
                 if (rawSlot >= topSize) continue;
 
                 if (!sellZoneSlots.contains(rawSlot)) {
@@ -99,23 +99,22 @@ public class JGui extends AdvancedGui implements Listener {
         });
 
 
-        for (Button button : menu.buttons( )) {
-            registerItem(button.id( ) + button.slot( ), builder -> {
-                builder.slots(button.slot( ));
+        for (Button button : menu.buttons()) {
+            registerItem(button.id() + button.slot(), builder -> {
+                builder.slots(button.slot());
                 builder.defaultItem(ItemWrapper.builder(
-                                button.material( ))
-                        .displayName(TextUtil.setPapi(player, button.displayName( )))
-                        .lore(TextUtil.setPapi(player, button.lore( )))
-                        .customModelData(button.customModelData( ))
-                        .enchanted(button.enchanted( ))
-                        .amount(button.amount( ))
+                                button.material())
+                        .displayName(TextUtil.setPapi(player, button.displayName()))
+                        .lore(TextUtil.setPapi(player, button.lore()))
+                        .customModelData(button.customModelData())
+                        .enchanted(button.enchanted())
+                        .amount(button.amount())
                         .placeholderEngine(mainPlaceholders)
-                        .build( ));
+                        .build());
 
 
-
-                if (button.sellZone( )) {
-                    sellZoneSlots.add(button.slot( ));
+                if (button.sellZone()) {
+                    sellZoneSlots.add(button.slot());
                     return;
                 }
 
@@ -123,20 +122,20 @@ public class JGui extends AdvancedGui implements Listener {
 
                     event.setCancelled(true);
 
-                    ClickType clickType = event.getClick( );
+                    ClickType clickType = event.getClick();
 
-                    Logger.warn("При клике из класса JGui цена: "+df.format(totalPrice));
+                    Logger.warn("При клике из класса JGui цена: " + df.format(totalPrice));
 
-                    for (Command cmd : button.commands( )) {
-                        if (cmd.clickType( ) == clickType || cmd.anyClick( )) {
+                    for (Command cmd : button.commands()) {
+                        if (cmd.clickType() == clickType || cmd.anyClick()) {
 
                             boolean allRequirementsPassed = true;
-                            if (!cmd.requirements( ).isEmpty( )) {
-                                for (Requirements requirements : cmd.requirements( )) {
-                                    if ((requirements.anyClick( ) || requirements.clickType( ) == clickType)) {
+                            if (!cmd.requirements().isEmpty()) {
+                                for (Requirements requirements : cmd.requirements()) {
+                                    if ((requirements.anyClick() || requirements.clickType() == clickType)) {
                                         if (!ClickRequirement.check(
                                                 player, requirements, totalPrice, totalScores, button)) {
-                                            ClickRequirement.runDenyCommands(player, requirements.deny_commands( ), button);
+                                            ClickRequirement.runDenyCommands(player, requirements.deny_commands(), button);
                                             allRequirementsPassed = false;
                                             break;
                                         }
@@ -145,12 +144,12 @@ public class JGui extends AdvancedGui implements Listener {
                             }
 
                             if (allRequirementsPassed) {
-                                List<String> list = new ArrayList<>(cmd.actions( ));
-                                if (plugin.getItems( ).getItemValues( ).containsKey(button.material())) {
-                                    double price = plugin.getItems( ).getItemValues( ).get(button.material()).price( );
+                                List<String> list = new ArrayList<>(cmd.actions());
+                                if (plugin.getItems().getItemValues().containsKey(button.material())) {
+                                    double price = plugin.getItems().getItemValues().get(button.material()).price();
                                     list.replaceAll(s -> s.replace("%price%", df.format(price)));
-                                    list.replaceAll(s -> s.replace("%price_with_coefficient%", String.valueOf(price * plugin.getCoefficient( ).get(player))));
-                                    list.replaceAll(s -> s.replace("%auto_sell_toggle_state%", Manager.check(plugin.getStorage( ).getAutoBuyItems(player.getUniqueId( )).contains(button.material().name()))));
+                                    list.replaceAll(s -> s.replace("%price_with_coefficient%", String.valueOf(price * plugin.getCoefficient().get(player))));
+                                    list.replaceAll(s -> s.replace("%auto_sell_toggle_state%", Manager.check(plugin.getStorage().getAutoBuyItems(player.getUniqueId()).contains(button.material().name()))));
                                 }
                                 list.replaceAll(s -> s.replace("%sell_pay%", df.format(totalPrice)));
                                 list.replaceAll(s -> s.replace("%sell_score%", df.format(totalScores)));
@@ -164,14 +163,14 @@ public class JGui extends AdvancedGui implements Listener {
                 });
             });
 
-            getController(button.id( ) + button.slot( )).get( ).updateItem(button.slot( ), wrapper -> {
-                if (wrapper.itemStack( ).getType( ).equals(Material.AIR)) return;
-                ItemMeta itemMeta = wrapper.itemStack( ).getItemMeta( );
+            getController(button.id() + button.slot()).get().updateItem(button.slot(), wrapper -> {
+                if (wrapper.itemStack().getType().equals(Material.AIR)) return;
+                ItemMeta itemMeta = wrapper.itemStack().getItemMeta();
                 itemMeta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
-                itemMeta.getPersistentDataContainer( ).set(NAMESPACED_KEY, PersistentDataType.STRING, "menu_item");
+                itemMeta.getPersistentDataContainer().set(NAMESPACED_KEY, PersistentDataType.STRING, "menu_item");
                 Material materialType = null;
-                if (!button.commands( ).isEmpty( )) {
-                    for (Command command : button.commands( )) {
+                if (!button.commands().isEmpty()) {
+                    for (Command command : button.commands()) {
                         for (String cmd : command.actions()) {
                             if (cmd.startsWith("[AUTOBUY_ITEM_TOGGLE]".toUpperCase()) || cmd.startsWith("[SELL_ITEM]".toUpperCase())) {
 
@@ -181,21 +180,21 @@ public class JGui extends AdvancedGui implements Listener {
                                     materialType = button.material();
                                 }
 
-                                if (plugin.getItems( ).getItemValues( ).containsKey(materialType)) {
+                                if (plugin.getItems().getItemValues().containsKey(materialType)) {
 
-                                    PlaceholderEngine itemPlaceholders = PlaceholderEngine.of( );
+                                    PlaceholderEngine itemPlaceholders = PlaceholderEngine.of();
                                     itemPlaceholders.addAll(mainPlaceholders);
 
-                                    double price = plugin.getItems( ).getItemValues( ).get(materialType).price( );
+                                    double price = plugin.getItems().getItemValues().get(materialType).price();
 
                                     itemPlaceholders.register("%price%", (offlinePlayer) -> String.valueOf(price));
-                                    itemPlaceholders.register("%price_with_coefficient%", (offlinePlayer) -> String.valueOf(price * plugin.getCoefficient( ).get(player)));
+                                    itemPlaceholders.register("%price_with_coefficient%", (offlinePlayer) -> String.valueOf(price * plugin.getCoefficient().get(player)));
                                     Material finalMaterialType = materialType;
-                                    itemPlaceholders.register("%auto_sell_toggle_state%", (offlinePlayer) -> Manager.check(plugin.getStorage( ).getAutoBuyItems(player.getUniqueId( )).contains(finalMaterialType.name())));
+                                    itemPlaceholders.register("%auto_sell_toggle_state%", (offlinePlayer) -> Manager.check(plugin.getStorage().getAutoBuyItems(player.getUniqueId()).contains(finalMaterialType.name())));
                                     itemPlaceholders.register("%sell_pay%", (offlinePlayer) -> df.format(totalPrice));
                                     itemPlaceholders.register("%sell_score%", (offlinePlayer) -> df.format(totalScores));
                                     wrapper.placeholderEngine(itemPlaceholders);
-                                    itemMeta.getPersistentDataContainer( ).set(NAMESPACED_KEY, PersistentDataType.STRING, "menu_priceItem");
+                                    itemMeta.getPersistentDataContainer().set(NAMESPACED_KEY, PersistentDataType.STRING, "menu_priceItem");
                                 }
                                 break;
                             }
@@ -204,24 +203,25 @@ public class JGui extends AdvancedGui implements Listener {
                 }
 
                 if (itemMeta.getPersistentDataContainer().get(NAMESPACED_KEY, PersistentDataType.STRING).equalsIgnoreCase("menu_priceItem")) {
-                    wrapper.enchanted(plugin.getStorage( ).getAutoBuyItems(player.getUniqueId( )).contains(materialType.name( )));
+                    wrapper.enchanted(plugin.getStorage().getAutoBuyItems(player.getUniqueId()).contains(materialType.name()));
                 }
 
-                wrapper.itemStack( ).setItemMeta(itemMeta);
+                wrapper.itemStack().setItemMeta(itemMeta);
             });
 
         }
 
         onClose(event -> {
-            for (ItemStack itemStack : event.getInventory( ).getContents( )) {
-                if (itemStack == null || itemStack.getType( ).equals(Material.AIR)) continue;
-                if (itemStack.getItemMeta( ).getPersistentDataContainer( ).has(NAMESPACED_KEY, PersistentDataType.STRING)) continue;
-                if (event.getPlayer( ).getInventory( ).firstEmpty( ) == -1) {
-                    event.getPlayer( ).getWorld( ).dropItemNaturally(event.getPlayer( ).getLocation( ), itemStack);
+            for (ItemStack itemStack : event.getInventory().getContents()) {
+                if (itemStack == null || itemStack.getType().equals(Material.AIR)) continue;
+                if (itemStack.getItemMeta().getPersistentDataContainer().has(NAMESPACED_KEY, PersistentDataType.STRING))
+                    continue;
+                if (event.getPlayer().getInventory().firstEmpty() == -1) {
+                    event.getPlayer().getWorld().dropItemNaturally(event.getPlayer().getLocation(), itemStack);
                     continue;
                 }
-                event.getPlayer( ).getInventory( ).addItem(itemStack);
-                event.getInventory( ).remove(itemStack);
+                event.getPlayer().getInventory().addItem(itemStack);
+                event.getInventory().remove(itemStack);
             }
 //            plugin.getMenuLoader( ).getJGui( ).remove(event.getPlayer( ).getUniqueId( ));
         });
@@ -230,12 +230,12 @@ public class JGui extends AdvancedGui implements Listener {
 
     @EventHandler
     public void click(InventoryClickEvent e) {
-        if (!(e.getWhoClicked( ) instanceof Player player)) return;
+        if (!(e.getWhoClicked() instanceof Player player)) return;
 
-        Inventory topInventory = player.getOpenInventory( ).getTopInventory( );
-        Inventory clickedInv = e.getClickedInventory( );
-        int rawSlot = e.getRawSlot( );
-        ClickType click = e.getClick( );
+        Inventory topInventory = player.getOpenInventory().getTopInventory();
+        Inventory clickedInv = e.getClickedInventory();
+        int rawSlot = e.getRawSlot();
+        ClickType click = e.getClick();
 
         if (!inventory.equals(topInventory)) return;
 
@@ -251,23 +251,23 @@ public class JGui extends AdvancedGui implements Listener {
         }
 
         if ((click == ClickType.SHIFT_LEFT || click == ClickType.SHIFT_RIGHT)
-                && (clickedInv == null || clickedInv.equals(player.getInventory( )))) {
+                && (clickedInv == null || clickedInv.equals(player.getInventory()))) {
             e.setCancelled(true);
 
-            ItemStack clicked = e.getCurrentItem( );
-            if (clicked == null || clicked.getType( ).isAir( )) {
+            ItemStack clicked = e.getCurrentItem();
+            if (clicked == null || clicked.getType().isAir()) {
                 Manager.refreshMenu(player, this);
                 return;
             }
 
-            int remaining = clicked.getAmount( );
+            int remaining = clicked.getAmount();
 
             for (int slot : sellZoneSlots) {
                 ItemStack slotItem = inventory.getItem(slot);
 
-                if (slotItem == null || slotItem.getType( ).isAir( )) {
-                    ItemStack toPut = clicked.clone( );
-                    int putAmount = Math.min(remaining, toPut.getMaxStackSize( ));
+                if (slotItem == null || slotItem.getType().isAir()) {
+                    ItemStack toPut = clicked.clone();
+                    int putAmount = Math.min(remaining, toPut.getMaxStackSize());
                     toPut.setAmount(putAmount);
                     inventory.setItem(slot, toPut);
                     remaining -= putAmount;
@@ -279,10 +279,10 @@ public class JGui extends AdvancedGui implements Listener {
                     }
                 }
 
-                if (slotItem.isSimilar(clicked) && slotItem.getAmount( ) < slotItem.getMaxStackSize( )) {
-                    int space = slotItem.getMaxStackSize( ) - slotItem.getAmount( );
+                if (slotItem.isSimilar(clicked) && slotItem.getAmount() < slotItem.getMaxStackSize()) {
+                    int space = slotItem.getMaxStackSize() - slotItem.getAmount();
                     int toAdd = Math.min(space, remaining);
-                    slotItem.setAmount(slotItem.getAmount( ) + toAdd);
+                    slotItem.setAmount(slotItem.getAmount() + toAdd);
                     inventory.setItem(slot, slotItem);
                     remaining -= toAdd;
                     if (remaining <= 0) {
@@ -293,7 +293,7 @@ public class JGui extends AdvancedGui implements Listener {
             }
 
             if (remaining > 0) {
-                ItemStack left = clicked.clone( );
+                ItemStack left = clicked.clone();
                 left.setAmount(remaining);
                 e.setCurrentItem(left);
             } else {
@@ -304,13 +304,12 @@ public class JGui extends AdvancedGui implements Listener {
             return;
         }
 
-        if (rawSlot < inventory.getSize( ) && !sellZoneSlots.contains(rawSlot)) {
+        if (rawSlot < inventory.getSize() && !sellZoneSlots.contains(rawSlot)) {
             e.setCancelled(true);
             return;
         }
 
         Manager.refreshMenu(player, this);
     }
-
 
 }

@@ -7,7 +7,7 @@ import org.jetbrains.annotations.NotNull;
 
 public class MessageAction implements Action {
     @Override
-    public void execute(@NotNull Player player, String context, Button button) {
+    public void execute(@NotNull Player player, @NotNull String context, Button button) {
         player.sendMessage(context);
     }
 }

@@ -43,7 +43,8 @@ public class SQL implements Storage {
             this.autoBuyItems = new ArrayList<>(autoBuyItems);
         }
 
-        PlayerData() {}
+        PlayerData() {
+        }
     }
 
     private Connection connect() throws SQLException {
@@ -65,9 +66,9 @@ public class SQL implements Storage {
     public boolean load() {
         if (globalStatus) {
             try {
-                connection = connect( );
-                createTables( );
-                loadCacheAsync( );
+                connection = connect();
+                createTables();
+                loadCacheAsync();
                 return true;
             } catch (SQLException e) {
                 Logger.error("Ошибка инициализации базы данных: " + e);

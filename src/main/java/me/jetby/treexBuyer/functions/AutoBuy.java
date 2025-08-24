@@ -33,7 +33,7 @@ public class AutoBuy {
 
                 if (plugin.getItems().getItemValues().isEmpty()) break;
 
-                if (player.getInventory().getContents().length==0) continue;
+                if (player.getInventory().getContents().length == 0) continue;
 
                 if (!plugin.getStorage().getAutoBuyStatus(player.getUniqueId())) continue;
 
@@ -48,6 +48,7 @@ public class AutoBuy {
     public void stop() {
         Bukkit.getScheduler().cancelTask(task);
     }
+
     ItemStack air = new ItemStack(Material.AIR);
 
     public void checkItems(Player player) {
@@ -61,44 +62,46 @@ public class AutoBuy {
         double totalPrice = 0.0;
         int totalScores = 0;
         for (ItemStack itemStack : player.getInventory().getContents()) {
-            if (itemStack==null || itemStack.getType().isAir()) continue;
-            if (!plugin.getStorage().getAutoBuyItems(player.getUniqueId()).contains(itemStack.getType().name())) continue;
+            if (itemStack == null || itemStack.getType().isAir()) continue;
+            if (!plugin.getStorage().getAutoBuyItems(player.getUniqueId()).contains(itemStack.getType().name()))
+                continue;
             if (!isRegularItem(itemStack)) continue;
 
             if (!plugin.getItems().getItemValues().containsKey(itemStack.getType())) continue;
             Items.ItemData itemData = plugin.getItems().getItemValues().get(itemStack.getType());
 
-            double price = itemData.price()*plugin.getCoefficient().get(player);
+            double price = itemData.price() * plugin.getCoefficient().get(player);
             int score = itemData.score();
 
 
             if (player.getEquipment().getItemInOffHand().equals(itemStack)) {
                 player.getEquipment().setItemInOffHand(air);
             }
-            if (player.getEquipment().getHelmet()!=null && player.getEquipment().getHelmet().equals(itemStack)) {
+            if (player.getEquipment().getHelmet() != null && player.getEquipment().getHelmet().equals(itemStack)) {
                 player.getEquipment().setHelmet(air);
             }
-            if (player.getEquipment().getChestplate()!=null && player.getEquipment().getChestplate().equals(itemStack)) {
+            if (player.getEquipment().getChestplate() != null && player.getEquipment().getChestplate().equals(itemStack)) {
                 player.getEquipment().setChestplate(air);
             }
-            if (player.getEquipment().getLeggings()!=null && player.getEquipment().getLeggings().equals(itemStack)) {
+            if (player.getEquipment().getLeggings() != null && player.getEquipment().getLeggings().equals(itemStack)) {
                 player.getEquipment().setLeggings(air);
             }
-            if (player.getEquipment().getBoots()!=null && player.getEquipment().getBoots().equals(itemStack)) {
+            if (player.getEquipment().getBoots() != null && player.getEquipment().getBoots().equals(itemStack)) {
                 player.getEquipment().setBoots(air);
             }
 
             player.getInventory().removeItem(itemStack);
 
 
-            totalPrice+= price * itemStack.getAmount();
-            totalScores+= score * itemStack.getAmount();
+            totalPrice += price * itemStack.getAmount();
+            totalScores += score * itemStack.getAmount();
 
         }
 
-        if (totalPrice<=0L) return;
+        if (totalPrice <= 0L) return;
         plugin.getEconomy().depositPlayer(player, totalPrice);
-        if (totalScores>0) plugin.getStorage().setScore(player.getUniqueId(), plugin.getStorage().getScore(player.getUniqueId())+totalScores);
+        if (totalScores > 0)
+            plugin.getStorage().setScore(player.getUniqueId(), plugin.getStorage().getScore(player.getUniqueId()) + totalScores);
 
 
         List<String> list = new ArrayList<>(plugin.getCfg().getAutoBuyActions());
@@ -113,6 +116,7 @@ public class AutoBuy {
 
 
     }
+
     public static boolean isRegularItem(@NotNull ItemStack item) {
         ItemMeta meta = item.getItemMeta();
         return meta != null &&

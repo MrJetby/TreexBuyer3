@@ -12,6 +12,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.logging.Level;
 
 @RequiredArgsConstructor
 public class Yaml implements Storage {
@@ -23,15 +24,15 @@ public class Yaml implements Storage {
     public boolean load() {
         final boolean[] status = {false};
 
-        Bukkit.getScheduler().runTaskAsynchronously(Main.getInstance( ), ()-> {
+        Bukkit.getScheduler().runTaskAsynchronously(Main.getInstance(), () -> {
             long start = System.currentTimeMillis();
 
             try {
                 for (String key : configuration.getKeys(false)) {
                     UUID uuid = UUID.fromString(key);
-                    int score = configuration.getInt(key+".score", 0);
-                    boolean autoBuy = configuration.getBoolean(key+".autoBuy", false);
-                    List<String> items = configuration.getStringList(key+".autoBuyItems");
+                    int score = configuration.getInt(key + ".score", 0);
+                    boolean autoBuy = configuration.getBoolean(key + ".autoBuy", false);
+                    List<String> items = configuration.getStringList(key + ".autoBuyItems");
                     Data data = new Data();
                     data.setUuid(uuid);
                     data.setScore(score);
@@ -43,7 +44,7 @@ public class Yaml implements Storage {
                 status[0] = true;
 
             } catch (Exception e) {
-                e.printStackTrace();
+                plugin.getLogger().log(Level.WARNING, "Error with loading from the storage", e);
                 status[0] = false;
             }
         });
@@ -52,9 +53,10 @@ public class Yaml implements Storage {
 
     @Override
     public boolean save(boolean async) {
+        // TODO unused array, the result will be false on async saving
         final boolean[] status = {false};
         if (async) {
-            Bukkit.getScheduler().runTaskAsynchronously(Main.getInstance( ), ()-> {
+            Bukkit.getScheduler().runTaskAsynchronously(Main.getInstance(), () -> {
 
                 try {
                     for (Map.Entry<UUID, Data> entry : cache.entrySet()) {
@@ -69,7 +71,7 @@ public class Yaml implements Storage {
                     status[0] = true;
 
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    plugin.getLogger().log(Level.WARNING, "Error with saving to the storage", e);
                     status[0] = false;
                 }
             });
@@ -90,8 +92,7 @@ public class Yaml implements Storage {
                 status[0] = true;
 
             } catch (Exception e) {
-                e.printStackTrace();
-                status[0] = false;
+                plugin.getLogger().log(Level.WARNING, "Error with saving to the storage", e);
             }
         }
         return status[0];

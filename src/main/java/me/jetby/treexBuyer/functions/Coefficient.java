@@ -17,13 +17,13 @@ public class Coefficient {
         double playerScore = plugin.getStorage().getScore(player.getUniqueId());
         int scoreStep = plugin.getCfg().getScores();
         double coefficientStep = plugin.getCfg().getCoefficient();
-        int multiplierCount = (int)(playerScore / scoreStep);
+        int multiplierCount = (int) (playerScore / scoreStep);
         double coefficient = defaultCoefficient + multiplierCount * coefficientStep;
         double baseCoefficient = Math.min(coefficient, maxLegalCoefficient);
         baseCoefficient = Math.max(baseCoefficient, defaultCoefficient);
         double boosterCoefficient = 0.0F;
 
-        for(Boost boost : plugin.getCfg().getBoosts().values()) {
+        for (Boost boost : plugin.getCfg().getBoosts().values()) {
             if (boost.permission() != null && player.hasPermission(boost.permission())) {
                 boosterCoefficient += boost.coefficient();
             }

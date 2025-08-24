@@ -6,20 +6,25 @@ import me.jetby.treexBuyer.tools.Logger;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public class SoundAction implements Action {
     @Override
-    public void execute(@NotNull Player player, String context, Button button) {
+    public void execute(@Nullable Player player, @NotNull String context, Button button) {
+        if (player == null) return;
+
         var args = context.split(";");
-        Sound sound = null;
+        Sound sound;
         try {
             if (args.length >= 1) {
                 sound = Sound.valueOf(args[0].toUpperCase());
             } else {
                 Logger.warn("Sound is null");
+                return;
             }
         } catch (IllegalArgumentException e) {
             Logger.warn("Sound " + args[0] + " is not available");
+            return;
         }
 
         try {

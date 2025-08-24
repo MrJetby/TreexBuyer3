@@ -3,6 +3,7 @@ package me.jetby.treexBuyer.menus.commands;
 import lombok.Getter;
 import me.jetby.treexBuyer.Main;
 import me.jetby.treexBuyer.menus.commands.impl.*;
+import org.jetbrains.annotations.Nullable;
 
 @Getter
 public enum ActionType {
@@ -34,5 +35,16 @@ public enum ActionType {
 
     ActionType(Action action) {
         this.action = action;
+    }
+
+    @Nullable
+    public static ActionType getType(String name) {
+        if (name == null) return null;
+
+        try {
+            return ActionType.valueOf(name);
+        } catch (IllegalArgumentException ignored) {
+            return null;
+        }
     }
 }

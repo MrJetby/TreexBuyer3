@@ -70,6 +70,7 @@ public class Config {
         itemsPrices = configuration.getString("items-prices-file", "priceItem.yml");
 
     }
+
     public void loadBoosts(FileConfiguration configuration) {
         boosts.clear();
         ConfigurationSection boosterSection = configuration.getConfigurationSection("booster");

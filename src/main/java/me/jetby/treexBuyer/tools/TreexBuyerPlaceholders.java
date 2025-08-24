@@ -19,8 +19,9 @@ public class TreexBuyerPlaceholders extends PlaceholderExpansion {
     public @NotNull String getVersion() {
         return "";
     }
+
     @Override
-    public String onPlaceholderRequest(Player player, String identifier) {
+    public String onPlaceholderRequest(Player player, @NotNull String identifier) {
 
         return "";
     }

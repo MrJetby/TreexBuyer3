@@ -4,10 +4,13 @@ import me.jetby.treexBuyer.menus.Button;
 import me.jetby.treexBuyer.menus.commands.Action;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public class PlayerAction implements Action {
     @Override
-    public void execute(@NotNull Player player, String context, Button button) {
-        player.chat(context);
+    public void execute(@Nullable Player player, @NotNull String context, Button button) {
+        if (player != null) {
+            player.chat(context);
+        }
     }
 }

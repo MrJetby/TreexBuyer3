@@ -1,25 +1,24 @@
 package me.jetby.treexBuyer.menus.commands.impl;
 
-import lombok.RequiredArgsConstructor;
 import me.jetby.treexBuyer.Main;
 import me.jetby.treexBuyer.menus.Button;
 import me.jetby.treexBuyer.menus.JGui;
 import me.jetby.treexBuyer.menus.Manager;
 import me.jetby.treexBuyer.menus.commands.Action;
-import me.jetby.treexBuyer.storage.Storage;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
 
-@RequiredArgsConstructor
-public class AutoBuyItemToggleAction implements Action {
+public record AutoBuyItemToggleAction(Main plugin) implements Action {
 
-    private final Main plugin;
     @Override
-    public void execute(@NotNull Player player, @NotNull String context, Button button) {
+    public void execute(@Nullable Player player, @NotNull String context, Button button) {
+        if (player == null) return;
+
         Inventory inventory = player.getOpenInventory().getTopInventory();
 
         if (inventory == plugin.getMenuLoader().getJGui().get(player.getUniqueId()).getInventory()) {

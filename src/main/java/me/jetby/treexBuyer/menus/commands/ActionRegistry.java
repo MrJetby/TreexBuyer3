@@ -22,8 +22,8 @@ public class ActionRegistry {
                 Logger.warn("Illegal action pattern " + s);
                 return;
             }
-            var type = ActionType.valueOf(matcher.group(1).toUpperCase());
-            if (type==null) {
+            var type = ActionType.getType(matcher.group(1).toUpperCase());
+            if (type == null) {
                 Logger.warn("ActionType " + s + " is not available!");
                 return;
             }
