@@ -35,18 +35,19 @@ import static me.jetby.treexBuyer.Main.df;
 
 public class JGui extends AdvancedGui implements Listener {
 
-    final Menu menu;
+    private final Menu menu;
+    private final Player player;
     @Getter
-    Inventory inventory;
+    private Inventory inventory;
 
     @Getter
     @Setter
-    double totalPrice = 0.0;
+    private double totalPrice = 0.0;
     @Getter
     @Setter
-    int totalScores = 0;
+    private int totalScores = 0;
 
-    final PlaceholderEngine mainPlaceholders = PlaceholderEngine.of();
+    private final PlaceholderEngine mainPlaceholders = PlaceholderEngine.of();
 
     @Getter
     final List<Integer> sellZoneSlots = new ArrayList<>();
@@ -54,14 +55,20 @@ public class JGui extends AdvancedGui implements Listener {
 
     public JGui(Menu menu, Main plugin, Player player) {
         super(menu.size(), menu.title());
+
         this.menu = menu;
+        this.player = player;
         this.plugin = plugin;
         Bukkit.getServer().getPluginManager().registerEvents(this, plugin);
 
+        // Placeholders start
         mainPlaceholders.register("%sell_pay%", (offlinePlayer) -> df.format(totalPrice));
         mainPlaceholders.register("%sell_score%", (offlinePlayer) -> df.format(totalScores));
         mainPlaceholders.register("%coefficient%", (offlinePlayer) -> {
-            if (offlinePlayer != null) return String.valueOf(plugin.getCoefficient().get(offlinePlayer.getPlayer()));
+            if (offlinePlayer != null) {
+                Player p = offlinePlayer.getPlayer();
+                if (p != null) return String.valueOf(plugin.getCoefficient().get(p));
+            }
             return "";
         });
         mainPlaceholders.register("%global_auto_sell_toggle_state%", (offlinePlayer -> {
@@ -71,9 +78,12 @@ public class JGui extends AdvancedGui implements Listener {
         }));
         mainPlaceholders.register("%score%", (offlinePlayer) -> {
             if (offlinePlayer != null)
-                return String.valueOf(plugin.getStorage().getScore(offlinePlayer.getPlayer().getUniqueId()));
+                return String.valueOf(plugin.getStorage().getScore(offlinePlayer.getUniqueId()));
             return "";
         });
+        // Placeholder end
+
+        registerButtons();
 
         onOpen(event -> {
             plugin.getMenuLoader().getJGui().put(player.getUniqueId(), this);
@@ -98,119 +108,6 @@ public class JGui extends AdvancedGui implements Listener {
             event.setCancelled(false);
         });
 
-
-        for (Button button : menu.buttons()) {
-            registerItem(button.id() + button.slot(), builder -> {
-                builder.slots(button.slot());
-                builder.defaultItem(ItemWrapper.builder(
-                                button.material())
-                        .displayName(TextUtil.setPapi(player, button.displayName()))
-                        .lore(TextUtil.setPapi(player, button.lore()))
-                        .customModelData(button.customModelData())
-                        .enchanted(button.enchanted())
-                        .amount(button.amount())
-                        .placeholderEngine(mainPlaceholders)
-                        .build());
-
-
-                if (button.sellZone()) {
-                    sellZoneSlots.add(button.slot());
-                    return;
-                }
-
-                builder.defaultClickHandler((event, controller) -> {
-
-                    event.setCancelled(true);
-
-                    ClickType clickType = event.getClick();
-
-                    Logger.warn("При клике из класса JGui цена: " + df.format(totalPrice));
-
-                    for (Command cmd : button.commands()) {
-                        if (cmd.clickType() == clickType || cmd.anyClick()) {
-
-                            boolean allRequirementsPassed = true;
-                            if (!cmd.requirements().isEmpty()) {
-                                for (Requirements requirements : cmd.requirements()) {
-                                    if ((requirements.anyClick() || requirements.clickType() == clickType)) {
-                                        if (!ClickRequirement.check(
-                                                player, requirements, totalPrice, totalScores, button)) {
-                                            ClickRequirement.runDenyCommands(player, requirements.deny_commands(), button);
-                                            allRequirementsPassed = false;
-                                            break;
-                                        }
-                                    }
-                                }
-                            }
-
-                            if (allRequirementsPassed) {
-                                List<String> list = new ArrayList<>(cmd.actions());
-                                if (plugin.getItems().getItemValues().containsKey(button.material())) {
-                                    double price = plugin.getItems().getItemValues().get(button.material()).price();
-                                    list.replaceAll(s -> s.replace("%price%", df.format(price)));
-                                    list.replaceAll(s -> s.replace("%price_with_coefficient%", String.valueOf(price * plugin.getCoefficient().get(player))));
-                                    list.replaceAll(s -> s.replace("%auto_sell_toggle_state%", Manager.check(plugin.getStorage().getAutoBuyItems(player.getUniqueId()).contains(button.material().name()))));
-                                }
-                                list.replaceAll(s -> s.replace("%sell_pay%", df.format(totalPrice)));
-                                list.replaceAll(s -> s.replace("%sell_score%", df.format(totalScores)));
-                                ActionExecutor.execute(player, ActionRegistry.transform(list), button);
-                                break;
-                            }
-                        }
-                    }
-
-
-                });
-            });
-
-            getController(button.id() + button.slot()).get().updateItem(button.slot(), wrapper -> {
-                if (wrapper.itemStack().getType().equals(Material.AIR)) return;
-                ItemMeta itemMeta = wrapper.itemStack().getItemMeta();
-                itemMeta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
-                itemMeta.getPersistentDataContainer().set(NAMESPACED_KEY, PersistentDataType.STRING, "menu_item");
-                Material materialType = null;
-                if (!button.commands().isEmpty()) {
-                    for (Command command : button.commands()) {
-                        for (String cmd : command.actions()) {
-                            if (cmd.startsWith("[AUTOBUY_ITEM_TOGGLE]".toUpperCase()) || cmd.startsWith("[SELL_ITEM]".toUpperCase())) {
-
-                                try {
-                                    materialType = Material.valueOf(Manager.getAutoBuyItemToggle(wrapper, cmd));
-                                } catch (IllegalArgumentException e) {
-                                    materialType = button.material();
-                                }
-
-                                if (plugin.getItems().getItemValues().containsKey(materialType)) {
-
-                                    PlaceholderEngine itemPlaceholders = PlaceholderEngine.of();
-                                    itemPlaceholders.addAll(mainPlaceholders);
-
-                                    double price = plugin.getItems().getItemValues().get(materialType).price();
-
-                                    itemPlaceholders.register("%price%", (offlinePlayer) -> String.valueOf(price));
-                                    itemPlaceholders.register("%price_with_coefficient%", (offlinePlayer) -> String.valueOf(price * plugin.getCoefficient().get(player)));
-                                    Material finalMaterialType = materialType;
-                                    itemPlaceholders.register("%auto_sell_toggle_state%", (offlinePlayer) -> Manager.check(plugin.getStorage().getAutoBuyItems(player.getUniqueId()).contains(finalMaterialType.name())));
-                                    itemPlaceholders.register("%sell_pay%", (offlinePlayer) -> df.format(totalPrice));
-                                    itemPlaceholders.register("%sell_score%", (offlinePlayer) -> df.format(totalScores));
-                                    wrapper.placeholderEngine(itemPlaceholders);
-                                    itemMeta.getPersistentDataContainer().set(NAMESPACED_KEY, PersistentDataType.STRING, "menu_priceItem");
-                                }
-                                break;
-                            }
-                        }
-                    }
-                }
-
-                if (itemMeta.getPersistentDataContainer().get(NAMESPACED_KEY, PersistentDataType.STRING).equalsIgnoreCase("menu_priceItem")) {
-                    wrapper.enchanted(plugin.getStorage().getAutoBuyItems(player.getUniqueId()).contains(materialType.name()));
-                }
-
-                wrapper.itemStack().setItemMeta(itemMeta);
-            });
-
-        }
-
         onClose(event -> {
             for (ItemStack itemStack : event.getInventory().getContents()) {
                 if (itemStack == null || itemStack.getType().equals(Material.AIR)) continue;
@@ -230,9 +127,9 @@ public class JGui extends AdvancedGui implements Listener {
 
     @EventHandler
     public void click(InventoryClickEvent e) {
-        if (!(e.getWhoClicked() instanceof Player player)) return;
+        if (!(e.getWhoClicked() instanceof Player p)) return;
 
-        Inventory topInventory = player.getOpenInventory().getTopInventory();
+        Inventory topInventory = p.getOpenInventory().getTopInventory();
         Inventory clickedInv = e.getClickedInventory();
         int rawSlot = e.getRawSlot();
         ClickType click = e.getClick();
@@ -242,7 +139,7 @@ public class JGui extends AdvancedGui implements Listener {
         if (clickedInv != null && clickedInv.equals(topInventory)) {
             if (!sellZoneSlots.contains(rawSlot)) {
                 if (click == ClickType.SHIFT_LEFT || click == ClickType.SHIFT_RIGHT) {
-                    Manager.refreshMenu(player, this);
+                    Manager.refreshMenu(p, this);
                 } else {
                     e.setCancelled(true);
                 }
@@ -251,12 +148,12 @@ public class JGui extends AdvancedGui implements Listener {
         }
 
         if ((click == ClickType.SHIFT_LEFT || click == ClickType.SHIFT_RIGHT)
-                && (clickedInv == null || clickedInv.equals(player.getInventory()))) {
+                && (clickedInv == null || clickedInv.equals(p.getInventory()))) {
             e.setCancelled(true);
 
             ItemStack clicked = e.getCurrentItem();
             if (clicked == null || clicked.getType().isAir()) {
-                Manager.refreshMenu(player, this);
+                Manager.refreshMenu(p, this);
                 return;
             }
 
@@ -300,7 +197,7 @@ public class JGui extends AdvancedGui implements Listener {
                 e.setCurrentItem(null);
             }
 
-            Manager.refreshMenu(player, this);
+            Manager.refreshMenu(p, this);
             return;
         }
 
@@ -309,7 +206,126 @@ public class JGui extends AdvancedGui implements Listener {
             return;
         }
 
-        Manager.refreshMenu(player, this);
+        Manager.refreshMenu(p, this);
+    }
+
+    private void registerButtons() {
+        for (Button button : menu.buttons()) {
+            registerItem(button.id() + button.slot(), builder -> {
+                builder.slots(button.slot());
+
+                ItemWrapper wrapper = new ItemWrapper(button.material(), button.amount());
+                wrapper.displayName(TextUtil.setPapi(player, button.displayName()));
+                wrapper.lore(TextUtil.setPapi(player, button.lore()));
+                wrapper.customModelData(button.customModelData());
+                wrapper.enchanted(button.enchanted());
+                wrapper.placeholderEngine(mainPlaceholders);
+
+                updateCustomItem(wrapper, button);
+
+                builder.defaultItem(wrapper);
+
+                if (button.sellZone()) {
+                    sellZoneSlots.add(button.slot());
+                    return;
+                }
+
+                builder.defaultClickHandler((event, controller) -> {
+
+                    event.setCancelled(true);
+
+                    ClickType clickType = event.getClick();
+
+                    Logger.warn("При клике из класса JGui цена: " + df.format(totalPrice));
+
+                    for (Command cmd : button.commands()) {
+                        if (cmd.clickType() == clickType || cmd.anyClick()) {
+
+                            boolean allRequirementsPassed = true;
+                            if (!cmd.requirements().isEmpty()) {
+                                for (Requirements requirements : cmd.requirements()) {
+                                    if ((requirements.anyClick() || requirements.clickType() == clickType)) {
+                                        if (!ClickRequirement.check(
+                                                player, requirements, totalPrice, totalScores, button)) {
+                                            ClickRequirement.runDenyCommands(player, requirements.deny_commands(), button);
+                                            allRequirementsPassed = false;
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+
+                            if (allRequirementsPassed) {
+                                List<String> list = new ArrayList<>(cmd.actions());
+                                if (plugin.getItems().getItemValues().containsKey(button.material())) {
+                                    double price = plugin.getItems().getItemValues().get(button.material()).price();
+                                    list.replaceAll(s -> s.replace("%price%", df.format(price)));
+                                    list.replaceAll(s -> s.replace("%price_with_coefficient%", String.valueOf(price * plugin.getCoefficient().get(player))));
+                                    list.replaceAll(s -> s.replace("%auto_sell_toggle_state%", Manager.check(plugin.getStorage().getAutoBuyItems(player.getUniqueId()).contains(button.material().name()))));
+                                }
+//                                list.replaceAll(s -> s.replace("%sell_pay%", df.format(totalPrice)));
+                                list.replaceAll(s -> s.replace("%sell_score%", df.format(totalScores)));
+                                ActionExecutor.execute(player, ActionRegistry.transform(list), button,
+                                        // TODO add other placeholders
+                                        Placeholder.of("%sell_pay%", () -> df.format(totalPrice))
+                                        );
+                                break;
+                            }
+                        }
+                    }
+
+
+                });
+            });
+
+        }
+    }
+
+    private void updateCustomItem(ItemWrapper wrapper, Button button) {
+        if(wrapper.itemStack().getType().equals(Material.AIR)) return;
+
+        ItemMeta itemMeta = wrapper.itemStack().getItemMeta();
+        itemMeta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
+        itemMeta.getPersistentDataContainer().set(NAMESPACED_KEY, PersistentDataType.STRING, "menu_item");
+        Material materialType = null;
+        if (!button.commands().isEmpty()) {
+            for (Command command : button.commands()) {
+                for (String cmd : command.actions()) {
+                    if (cmd.startsWith("[AUTOBUY_ITEM_TOGGLE]".toUpperCase()) || cmd.startsWith("[SELL_ITEM]".toUpperCase())) {
+
+                        try {
+                            materialType = Material.valueOf(Manager.getAutoBuyItemToggle(wrapper, cmd));
+                        } catch (IllegalArgumentException e) {
+                            materialType = button.material();
+                        }
+
+                        if (plugin.getItems().getItemValues().containsKey(materialType)) {
+
+                            PlaceholderEngine itemPlaceholders = PlaceholderEngine.of();
+                            itemPlaceholders.addAll(mainPlaceholders);
+
+                            double price = plugin.getItems().getItemValues().get(materialType).price();
+
+                            itemPlaceholders.register("%price%", (offlinePlayer) -> String.valueOf(price));
+                            itemPlaceholders.register("%price_with_coefficient%", (offlinePlayer) -> String.valueOf(price * plugin.getCoefficient().get(player)));
+                            Material finalMaterialType = materialType;
+                            itemPlaceholders.register("%auto_sell_toggle_state%", (offlinePlayer) -> Manager.check(plugin.getStorage().getAutoBuyItems(player.getUniqueId()).contains(finalMaterialType.name())));
+                            itemPlaceholders.register("%sell_pay%", (offlinePlayer) -> df.format(totalPrice));
+                            itemPlaceholders.register("%sell_score%", (offlinePlayer) -> df.format(totalScores));
+                            wrapper.placeholderEngine(itemPlaceholders);
+                            itemMeta.getPersistentDataContainer().set(NAMESPACED_KEY, PersistentDataType.STRING, "menu_priceItem");
+                        }
+                        break;
+                    }
+                }
+            }
+        }
+
+        if (itemMeta.getPersistentDataContainer().get(NAMESPACED_KEY, PersistentDataType.STRING).equalsIgnoreCase("menu_priceItem")) {
+            wrapper.enchanted(plugin.getStorage().getAutoBuyItems(player.getUniqueId()).contains(materialType.name()));
+        }
+
+        wrapper.itemStack().setItemMeta(itemMeta);
     }
 
 }
