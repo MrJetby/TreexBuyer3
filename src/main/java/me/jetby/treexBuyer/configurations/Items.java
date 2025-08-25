@@ -19,11 +19,12 @@ public class Items {
         for (String key : config.getKeys(false)) {
             double price = config.getDouble(key + ".price", 0);
             int addScores = config.getInt(key + ".add-scores", 0);
-            itemValues.put(Material.valueOf(key), new ItemData(price, addScores));
+            String category = config.getString(key + ".category", "none");
+            itemValues.put(Material.valueOf(key), new ItemData(price, addScores, category));
         }
 
     }
 
-    public record ItemData(double price, int score) {
+    public record ItemData(double price, int score, String category) {
     }
 }
