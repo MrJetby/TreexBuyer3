@@ -67,7 +67,7 @@ public class Config {
 
         loadBoosts(configuration);
 
-        itemsPrices = configuration.getString("items-prices-file", "priceItem.yml");
+        itemsPrices = configuration.getString("items-prices-file", "prices.yml");
 
     }
 

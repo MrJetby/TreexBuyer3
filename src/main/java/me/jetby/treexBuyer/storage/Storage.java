@@ -2,12 +2,13 @@ package me.jetby.treexBuyer.storage;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 public interface Storage {
 
     boolean load();
 
-    boolean save(boolean async);
+    boolean save();
 
     String type();
 

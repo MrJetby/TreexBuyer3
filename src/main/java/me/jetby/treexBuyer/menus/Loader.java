@@ -4,7 +4,7 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import me.jetby.treexBuyer.Main;
 import me.jetby.treexBuyer.menus.commands.Command;
-import me.jetby.treexBuyer.menus.requirements.Requirements;
+import me.jetby.treexBuyer.menus.requirements.ClickRequirement;
 import me.jetby.treexBuyer.tools.Logger;
 import me.jetby.treexBuyer.tools.TextUtil;
 import org.bukkit.Bukkit;
@@ -149,8 +149,8 @@ public class Loader {
     }
 
 
-    private List<Requirements> requirements(ConfigurationSection itemSection, String name, ClickType clickType, boolean anyClick) {
-        List<Requirements> requirements = new ArrayList<>();
+    private List<ClickRequirement> requirements(ConfigurationSection itemSection, String name, ClickType clickType, boolean anyClick) {
+        List<ClickRequirement> requirements = new ArrayList<>();
         ConfigurationSection requirementsSection = itemSection.getConfigurationSection(name);
         if (requirementsSection == null) {
             return requirements;
@@ -158,7 +158,7 @@ public class Loader {
         for (String key : requirementsSection.getKeys(false)) {
             ConfigurationSection section = requirementsSection.getConfigurationSection(key);
             if (section == null) continue;
-            requirements.add(new Requirements(anyClick, clickType,
+            requirements.add(new ClickRequirement(anyClick, clickType,
                     section.getString("type"),
                     section.getString("input"),
                     section.getString("output"),

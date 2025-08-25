@@ -10,6 +10,7 @@ public enum ActionType {
 
     MESSAGE(new MessageAction()),
     SOUND(new SoundAction()),
+    EFFECT(new EffectAction()),
     ACTIONBAR(new ActionBarAction()),
     TITLE(new TitleAction()),
     CONSOLE(new ConsoleAction()),

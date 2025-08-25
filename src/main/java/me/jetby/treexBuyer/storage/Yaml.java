@@ -1,101 +1,73 @@
 package me.jetby.treexBuyer.storage;
 
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import lombok.Setter;
 import me.jetby.treexBuyer.Main;
 import me.jetby.treexBuyer.tools.FileLoader;
 import me.jetby.treexBuyer.tools.Logger;
-import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-import java.util.logging.Level;
+
+import java.util.*;
 
 @RequiredArgsConstructor
 public class Yaml implements Storage {
     final Main plugin;
-    final Map<UUID, Data> cache = new HashMap<>();
+    final Map<UUID, Data> cache = new HashMap<>( );
     final FileConfiguration configuration = FileLoader.getFileConfiguration("storage.yml");
 
     @Override
     public boolean load() {
-        final boolean[] status = {false};
+        cache.clear();
+        boolean status = false;
 
-        Bukkit.getScheduler().runTaskAsynchronously(Main.getInstance(), () -> {
-            long start = System.currentTimeMillis();
+        long start = System.currentTimeMillis( );
 
-            try {
-                for (String key : configuration.getKeys(false)) {
-                    UUID uuid = UUID.fromString(key);
-                    int score = configuration.getInt(key + ".score", 0);
-                    boolean autoBuy = configuration.getBoolean(key + ".autoBuy", false);
-                    List<String> items = configuration.getStringList(key + ".autoBuyItems");
-                    Data data = new Data();
-                    data.setUuid(uuid);
-                    data.setScore(score);
-                    data.setAutoBuy(autoBuy);
-                    data.setAutoBuyItems(items);
-                    cache.put(uuid, data);
-                }
-                Logger.success("Данные из storage.yml были загружены за " + (System.currentTimeMillis() - start) + " мс");
-                status[0] = true;
-
-            } catch (Exception e) {
-                plugin.getLogger().log(Level.WARNING, "Error with loading from the storage", e);
-                status[0] = false;
+        try {
+            for (String key : configuration.getKeys(false)) {
+                UUID uuid = UUID.fromString(key);
+                int score = configuration.getInt(key + ".score", 0);
+                boolean autoBuy = configuration.getBoolean(key + ".autoBuy", false);
+                List<String> items = configuration.getStringList(key + ".autoBuyItems");
+                Data data = new Data( );
+                data.setUuid(uuid);
+                data.setScore(score);
+                data.setAutoBuy(autoBuy);
+                data.setAutoBuyItems(items);
+                cache.put(uuid, data);
             }
-        });
-        return status[0];
+            Logger.success("Данные из storage.yml были загружены за " + (System.currentTimeMillis( ) - start) + " мс");
+            status = true;
+
+        } catch (Exception e) {
+            Logger.error("Error with loading from the storage: "+ e);
+        }
+
+        return status;
     }
 
     @Override
-    public boolean save(boolean async) {
-        // TODO unused array, the result will be false on async saving
-        final boolean[] status = {false};
-        if (async) {
-            Bukkit.getScheduler().runTaskAsynchronously(Main.getInstance(), () -> {
+    public boolean save() {
+        boolean status = false;
 
-                try {
-                    for (Map.Entry<UUID, Data> entry : cache.entrySet()) {
-                        Data data = entry.getValue();
-                        String key = data.getUuid().toString();
-                        configuration.set(key + ".score", data.getScore());
-                        configuration.set(key + ".autoBuy", data.isAutoBuy());
-                        configuration.set(key + ".autoBuyItems", data.getAutoBuyItems());
-                    }
-
-                    configuration.save(FileLoader.getFile("storage.yml"));
-                    status[0] = true;
-
-                } catch (Exception e) {
-                    plugin.getLogger().log(Level.WARNING, "Error with saving to the storage", e);
-                    status[0] = false;
-                }
-            });
-        } else {
-            long start = System.currentTimeMillis();
-
-            try {
-                for (Map.Entry<UUID, Data> entry : cache.entrySet()) {
-                    Data data = entry.getValue();
-                    String key = data.getUuid().toString();
-                    configuration.set(key + ".score", data.getScore());
-                    configuration.set(key + ".autoBuy", data.isAutoBuy());
-                    configuration.set(key + ".autoBuyItems", data.getAutoBuyItems());
-                }
-
-                configuration.save(FileLoader.getFile("storage.yml"));
-                Logger.success("Данные в storage.yml были сохранены за " + (System.currentTimeMillis() - start) + " мс");
-                status[0] = true;
-
-            } catch (Exception e) {
-                plugin.getLogger().log(Level.WARNING, "Error with saving to the storage", e);
+        long start = System.currentTimeMillis( );
+        try {
+            for (Map.Entry<UUID, Data> entry : cache.entrySet( )) {
+                Data data = entry.getValue( );
+                String key = data.getUuid( ).toString( );
+                configuration.set(key + ".score", data.getScore( ));
+                configuration.set(key + ".autoBuy", data.isAutoBuy( ));
+                configuration.set(key + ".autoBuyItems", data.getAutoBuyItems( ));
             }
+
+            configuration.save(FileLoader.getFile("storage.yml"));
+            Logger.success("Данные в storage.yml были сохранены за " + (System.currentTimeMillis( ) - start) + " мс");
+            status = true;
+
+        } catch (Exception e) {
+            Logger.error("Error with saving to the storage: "+ e);
         }
-        return status[0];
+
+
+        return status;
     }
 
     @Override
@@ -115,101 +87,105 @@ public class Yaml implements Storage {
             Data data = cache.get(uuid);
             data.setScore(score);
         } else {
-            Data data = new Data();
+            Data data = new Data( );
             data.setUuid(uuid);
             data.setScore(score);
             data.setAutoBuy(false);
-            data.setAutoBuyItems(List.of());
+            data.setAutoBuyItems(List.of( ));
             cache.put(uuid, data);
         }
-        if (plugin.getCfg().isYamlForceSave()) save(true);
+        if (plugin.getCfg( ).isYamlForceSave( )) {if (!save()) Logger.error( "Failed to save score for UUID: " + uuid);}
 
     }
 
     @Override
     public int getScore(UUID uuid) {
         if (!playerExists(uuid)) {
-            Data data = new Data();
+            Data data = new Data( );
             data.setUuid(uuid);
             data.setScore(0);
             data.setAutoBuy(false);
-            data.setAutoBuyItems(List.of());
+            data.setAutoBuyItems(List.of( ));
             cache.put(uuid, data);
-            if (plugin.getCfg().isYamlForceSave()) save(true);
+            if (plugin.getCfg( ).isYamlForceSave( )) {if (!save()) Logger.error("Failed to save score for UUID: " + uuid);}
+
             return 0;
         }
         Data data = cache.get(uuid);
-        return data.getScore();
+        return data.getScore( );
     }
 
     @Override
     public void setAutoBuyItems(UUID uuid, List<String> items) {
         if (!playerExists(uuid)) {
-            Data data = new Data();
+            Data data = new Data( );
             data.setUuid(uuid);
             data.setScore(0);
             data.setAutoBuy(false);
-            data.setAutoBuyItems(items);
+            data.setAutoBuyItems(new ArrayList<>(items));
             cache.put(uuid, data);
-            if (plugin.getCfg().isYamlForceSave()) save(true);
+            if (plugin.getCfg( ).isYamlForceSave( )) {if (!save()) Logger.error("Failed to save score for UUID: " + uuid);}
+
             return;
         }
         Data data = cache.get(uuid);
         data.setAutoBuyItems(items);
-        if (plugin.getCfg().isYamlForceSave()) save(true);
+        if (plugin.getCfg( ).isYamlForceSave( )) {if (!save())Logger.error("Failed to save score for UUID: " + uuid);}
+
     }
 
     @Override
     public List<String> getAutoBuyItems(UUID uuid) {
         if (!playerExists(uuid)) {
-            Data data = new Data();
+            Data data = new Data( );
             data.setUuid(uuid);
             data.setScore(0);
             data.setAutoBuy(false);
-            data.setAutoBuyItems(List.of());
+            data.setAutoBuyItems(new ArrayList<>( ));
             cache.put(uuid, data);
-            if (plugin.getCfg().isYamlForceSave()) save(true);
-            return List.of();
+            if (plugin.getCfg( ).isYamlForceSave( )) {if (!save()) Logger.error( "Failed to save score for UUID: " + uuid);}
+
+            return List.of( );
         }
         Data data = cache.get(uuid);
-        return data.getAutoBuyItems();
+        return data.getAutoBuyItems( );
     }
 
     @Override
     public void setAutoBuyStatus(UUID uuid, boolean status) {
         if (!playerExists(uuid)) {
-            Data data = new Data();
+            Data data = new Data( );
             data.setUuid(uuid);
             data.setScore(0);
             data.setAutoBuy(status);
-            data.setAutoBuyItems(List.of());
+            data.setAutoBuyItems(new ArrayList<>( ));
             cache.put(uuid, data);
-            if (plugin.getCfg().isYamlForceSave()) save(true);
+            if (plugin.getCfg( ).isYamlForceSave( )) {if (!save()) Logger.error("Failed to save score for UUID: " + uuid);}
+
             return;
         }
         Data data = cache.get(uuid);
         data.setAutoBuy(status);
-        if (plugin.getCfg().isYamlForceSave()) save(true);
+        if (plugin.getCfg( ).isYamlForceSave( )) {if (!save()) Logger.error("Failed to save score for UUID: " + uuid);}
+
     }
 
     @Override
     public boolean getAutoBuyStatus(UUID uuid) {
         if (!playerExists(uuid)) {
-            Data data = new Data();
+            Data data = new Data( );
             data.setUuid(uuid);
             data.setScore(0);
             data.setAutoBuy(false);
-            data.setAutoBuyItems(List.of());
+            data.setAutoBuyItems(new ArrayList<>( ));
             cache.put(uuid, data);
             return false;
         }
         Data data = cache.get(uuid);
-        return data.isAutoBuy();
+        return data.isAutoBuy( );
     }
 
-    @RequiredArgsConstructor
-    @Getter
-    @Setter
+    @lombok.Data
     public static class Data {
         UUID uuid;
         boolean autoBuy;

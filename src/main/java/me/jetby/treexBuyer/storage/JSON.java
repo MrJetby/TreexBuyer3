@@ -63,7 +63,7 @@ public class JSON implements Storage {
 
     @SuppressWarnings("unchecked")
     @Override
-    public boolean save(boolean async) {
+    public boolean save() {
 //        Bukkit.getScheduler().runTaskAsynchronously(Main.getInstance( ), storage::save);
 
         try {

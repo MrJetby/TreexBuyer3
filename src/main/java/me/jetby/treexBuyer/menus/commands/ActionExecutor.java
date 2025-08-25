@@ -16,7 +16,6 @@ public class ActionExecutor {
         actions.keySet().forEach(type -> {
             var contexts = actions.get(type);
             for (String context : contexts) {
-                // TODO check for performance
                 for (Placeholder placeholder : placeholders) {
                     context = placeholder.replace(context);
                 }

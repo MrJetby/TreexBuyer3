@@ -18,8 +18,6 @@ storage:
 
 debug: false
 
-items-prices-file: priceItem.yml
-
 autobuy:
   delay: 60  # В тиках. Как часто будет срабатывать АвтоСкупка. По умолчанию 60 - 3 секунды
   actions:

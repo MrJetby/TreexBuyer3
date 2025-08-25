@@ -14,7 +14,7 @@ public class Items {
     private final Map<Material, ItemData> itemValues = new HashMap<>();
 
     public void load() {
-        FileConfiguration config = FileLoader.getFileConfiguration("priceItem.yml");
+        FileConfiguration config = FileLoader.getFileConfiguration("prices.yml");
 
         for (String key : config.getKeys(false)) {
             double price = config.getDouble(key + ".price", 0);

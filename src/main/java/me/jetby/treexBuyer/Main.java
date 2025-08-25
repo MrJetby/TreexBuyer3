@@ -48,7 +48,6 @@ public final class Main extends JavaPlugin {
     public void onEnable() {
         instance = this;
 
-
         JGuiInitializer.init(this);
 
         new Metrics(this, 25141);
@@ -56,18 +55,7 @@ public final class Main extends JavaPlugin {
         cfg = new Config();
         cfg.load();
 
-        switch (cfg.getStorageType()) {
-            case "MYSQL", "SQLITE":
-                storage = new SQL(this);
-                break;
-            case "JSON":
-                storage = new JSON();
-                break;
-            default:
-                storage = new Yaml(this);
-
-        }
-        storage.load();
+        loadStorage();
 
         items = new Items();
         items.load();
@@ -80,7 +68,7 @@ public final class Main extends JavaPlugin {
 
 
         if (!setupEconomy()) {
-            getLogger().severe("Vault with economy plugin not found! Disabling plugin.");
+            Logger.error("Vault with economy plugin not found! Disabling plugin.");
             getServer().getPluginManager().disablePlugin(this);
             return;
         }
@@ -88,7 +76,7 @@ public final class Main extends JavaPlugin {
         if (getServer().getPluginManager().getPlugin("PlaceholderAPI") == null) {
             Logger.warn("PlaceholderAPI not found. Placeholders are not being working");
         } else {
-            treexBuyerPlaceholders = new TreexBuyerPlaceholders();
+            treexBuyerPlaceholders = new TreexBuyerPlaceholders(this);
             treexBuyerPlaceholders.register();
         }
 
@@ -97,6 +85,20 @@ public final class Main extends JavaPlugin {
         PluginCommand treexbuyer = getCommand("treexbuyer");
         if (treexbuyer != null)
             treexbuyer.setExecutor(new AdminCommand(this));
+    }
+
+    public void loadStorage() {
+        switch (cfg.getStorageType()) {
+            case "MYSQL", "SQLITE":
+                storage = new SQL(this);
+                break;
+            case "JSON":
+                storage = new JSON();
+                break;
+            default:
+                storage = new Yaml(this);
+        }
+        storage.load();
     }
 
     private boolean setupEconomy() {
@@ -123,7 +125,7 @@ public final class Main extends JavaPlugin {
 
         CommandRegistrar.unregisterAll(this);
 
-        if (storage != null) storage.save(false);
+        if (storage != null) storage.save();
 
     }
 }

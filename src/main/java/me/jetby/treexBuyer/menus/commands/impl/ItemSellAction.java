@@ -60,9 +60,5 @@ public record ItemSellAction(Main plugin) implements Action {
         jGui.setTotalPrice(price);
         jGui.setTotalScores(score);
 
-        jGui.getController(button.id() + button.slot()).get().removeClickHandler(button.slot());
-
-        Logger.warn("При клике из класса ItemSellAction способом jGui.getTotalPrice() цена: " + df.format(jGui.getTotalPrice()));
-
     }
 }

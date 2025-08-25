@@ -9,9 +9,8 @@ import me.jetby.treexBuyer.Main;
 import me.jetby.treexBuyer.menus.commands.ActionExecutor;
 import me.jetby.treexBuyer.menus.commands.ActionRegistry;
 import me.jetby.treexBuyer.menus.commands.Command;
-import me.jetby.treexBuyer.menus.requirements.ClickRequirement;
 import me.jetby.treexBuyer.menus.requirements.Requirements;
-import me.jetby.treexBuyer.tools.Logger;
+import me.jetby.treexBuyer.menus.requirements.ClickRequirement;
 import me.jetby.treexBuyer.tools.TextUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -35,16 +34,15 @@ import static me.jetby.treexBuyer.Main.df;
 
 public class JGui extends AdvancedGui implements Listener {
 
+    @Getter
     private final Menu menu;
     private final Player player;
     @Getter
     private Inventory inventory;
 
-    @Getter
-    @Setter
+    @Getter @Setter
     private double totalPrice = 0.0;
-    @Getter
-    @Setter
+    @Getter @Setter
     private int totalScores = 0;
 
     private final PlaceholderEngine mainPlaceholders = PlaceholderEngine.of();
@@ -236,18 +234,17 @@ public class JGui extends AdvancedGui implements Listener {
 
                     ClickType clickType = event.getClick();
 
-                    Logger.warn("При клике из класса JGui цена: " + df.format(totalPrice));
 
                     for (Command cmd : button.commands()) {
                         if (cmd.clickType() == clickType || cmd.anyClick()) {
 
                             boolean allRequirementsPassed = true;
                             if (!cmd.requirements().isEmpty()) {
-                                for (Requirements requirements : cmd.requirements()) {
-                                    if ((requirements.anyClick() || requirements.clickType() == clickType)) {
-                                        if (!ClickRequirement.check(
-                                                player, requirements, totalPrice, totalScores, button)) {
-                                            ClickRequirement.runDenyCommands(player, requirements.deny_commands(), button);
+                                for (ClickRequirement clickRequirement : cmd.requirements()) {
+                                    if ((clickRequirement.anyClick() || clickRequirement.clickType() == clickType)) {
+                                        if (!Requirements.check(
+                                                player, clickRequirement, totalPrice, totalScores, button)) {
+                                            Requirements.runDenyCommands(player, clickRequirement.deny_commands(), totalPrice, totalScores, button);
                                             allRequirementsPassed = false;
                                             break;
                                         }
@@ -263,12 +260,9 @@ public class JGui extends AdvancedGui implements Listener {
                                     list.replaceAll(s -> s.replace("%price_with_coefficient%", String.valueOf(price * plugin.getCoefficient().get(player))));
                                     list.replaceAll(s -> s.replace("%auto_sell_toggle_state%", Manager.check(plugin.getStorage().getAutoBuyItems(player.getUniqueId()).contains(button.material().name()))));
                                 }
-//                                list.replaceAll(s -> s.replace("%sell_pay%", df.format(totalPrice)));
-                                list.replaceAll(s -> s.replace("%sell_score%", df.format(totalScores)));
                                 ActionExecutor.execute(player, ActionRegistry.transform(list), button,
-                                        // TODO add other placeholders
-                                        Placeholder.of("%sell_pay%", () -> df.format(totalPrice))
-                                        );
+                                        Placeholder.of("%sell_pay%", () -> df.format(totalPrice)),
+                                        Placeholder.of("%sell_score%", () -> df.format(totalScores)));
                                 break;
                             }
                         }
@@ -291,6 +285,9 @@ public class JGui extends AdvancedGui implements Listener {
         if (!button.commands().isEmpty()) {
             for (Command command : button.commands()) {
                 for (String cmd : command.actions()) {
+                    if (cmd.startsWith("[AUTOBUY_STATUS_TOGGLE]")) {
+                        itemMeta.getPersistentDataContainer().set(NAMESPACED_KEY, PersistentDataType.STRING, "menu_autobuy");
+                    }
                     if (cmd.startsWith("[AUTOBUY_ITEM_TOGGLE]".toUpperCase()) || cmd.startsWith("[SELL_ITEM]".toUpperCase())) {
 
                         try {
@@ -323,6 +320,8 @@ public class JGui extends AdvancedGui implements Listener {
 
         if (itemMeta.getPersistentDataContainer().get(NAMESPACED_KEY, PersistentDataType.STRING).equalsIgnoreCase("menu_priceItem")) {
             wrapper.enchanted(plugin.getStorage().getAutoBuyItems(player.getUniqueId()).contains(materialType.name()));
+        } else if (itemMeta.getPersistentDataContainer().get(NAMESPACED_KEY, PersistentDataType.STRING).equalsIgnoreCase("menu_autobuy")) {
+            wrapper.enchanted(plugin.getStorage().getAutoBuyStatus(player.getUniqueId()));
         }
 
         wrapper.itemStack().setItemMeta(itemMeta);
