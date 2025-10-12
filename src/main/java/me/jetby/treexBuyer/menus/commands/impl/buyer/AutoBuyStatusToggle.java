@@ -1,6 +1,5 @@
 package me.jetby.treexBuyer.menus.commands.impl.buyer;
 
-import lombok.RequiredArgsConstructor;
 import me.jetby.treexBuyer.Main;
 import me.jetby.treexBuyer.menus.Button;
 import me.jetby.treexBuyer.menus.JGui;
@@ -12,10 +11,13 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 
-@RequiredArgsConstructor
 public class AutoBuyStatusToggle implements Action {
 
     private final Main plugin;
+
+    public AutoBuyStatusToggle(Main plugin) {
+        this.plugin = plugin;
+    }
 
     @Override
     public void execute(@Nullable Player player, @NotNull String context, Button button) {

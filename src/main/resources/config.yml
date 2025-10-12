@@ -1,15 +1,15 @@
 storage:
   # YAML, MYSQL, SQLITE, JSON
-  type: "SQLITE"
+  type: "YAML"
   #
-  # Если type установлен на YAML или JSON
+  # If type is set to YAML or JSON
   #
-  # Если у вас большой онлайн, то рекомендуется включить эту опцию чтобы не нагружать сервер при работе с YAML/JSON
-  # true - Будет моментально сохранять данные в файл при изменении
-  # false - Будет сохранять данные в файл только при перезагрузке сервера
-  # Если у вас маленький онлайн, то можно оставить false
+  # If you have a large online, it is recommended to enable this option to avoid loading the server when working with YAML/JSON
+  # true - Will instantly save data to a file when changing
+  # false - Will save data to a file only when the server is rebooted
+  # If you have a small online, you can leave false
   yaml-or-json-force-save: false
-  # Данные ниже используются только для MYSQL
+  # The data below is used for MYSQL only.
   host: "localhost"
   port: 3306
   database: "treexbuyer"
@@ -19,40 +19,37 @@ storage:
 debug: false
 
 autobuy:
-  enable: true
-  delay: 60  # В тиках. Как часто будет срабатывать АвтоСкупка. По умолчанию 60 - 3 секунды
+  delay: 60  # In ticks. How often AutoBuy will be triggered. Default is 60 - 3 seconds
   actions:
-    - '[MESSAGE] &aАвто-скупка &7» &7Продано предметов на сумму &6$%sell_pay_commas% &7(&e+%sell_score% очков&7)'
+    - '[MESSAGE] &aAuto-buy &7» Items sold for &6$%sell_pay_commas% &7(&e+%sell_score% points&7)'
     - '[SOUND] entity_player_levelup;0.1'
   disabled-worlds:
     - duel-1
     - duel-2
   status:
-    enable: "&aВключён"
-    disable: "&cВыключен"
+    enable: "&aEnabled"
+    disable: "&cDisabled"
 
 
 score-system:
-  # Как будет расти Коэффициент
-  # GLOBAL - На все предметы сразу
-  # ITEM - Для каждого предмета свой
-  # CATEGORY - Для каждой категории свой
+  # How will the Coefficient grow
+  # GLOBAL - For all subjects at once
+  # ITEM - For each subject its own
+  # CATEGORY - For each category its own
   type: GLOBAL
-
-  # Каждые 100 очков юзеру прибавляется +0.01 множителя
   multiplier-ratio:
     scores: 100
     coefficient: 0.01
 
-  # максимальный коэффициент (без учёта донатных бустов)
+  # maximum coefficient (excluding donation boosts)
   default-coefficient: 1
   max-legal-coefficient: 3
 
-  # если true, донатные бусты будут обходить значение в max-legal-coefficient
+  # if true, donation boosts will bypass the value in max-legal-coefficient
   boosters_except_legal_coefficient: true
 
   booster:
-    donat-1: # имя (может быть любым)
-      permission: 'buyer.boost.donat1' # (пермишен по которому будет определяться наличие буста)
+    donat-1: # name (can be any)
+      permission: 'buyer.boost.donat1' # (permission by which the presence of a boost will be determined)
       external-coefficient: 0.5
 

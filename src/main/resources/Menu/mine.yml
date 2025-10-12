@@ -1,6 +1,6 @@
 id: mine
 
-title: "&0Ресурсы с шахты"
+title: "&0Resources from the mine"
 
 open_permission: none
 size: 54
@@ -22,11 +22,11 @@ Items:
       - 18-35
     category: mine
     lore:
-      - ' &fИзначальная Цена &a&l$%price% '
-      - ' &fТекущая Цена &c&l$%price_with_coefficient%'
+      - ' &fOriginal Price &a&l$%price% '
+      - ' &fCurrent Price &c&l$%price_with_coefficient%'
       - ''
-      - ' &7Кликните чтобы переключить авто скупку'
-      - ' &7Сейчас %auto_sell_toggle_state%'
+      - ' &7Click to toggle auto buy'
+      - ' &7Status %auto_sell_toggle_state%'
       - ''
     click_commands:
       - '[AUTOBUY_ITEM_TOGGLE]'
@@ -37,32 +37,32 @@ Items:
     material: NETHERITE_INGOT
     enchanted: true
     slot: 3
-    display_name: "&6■ &fКатегория: &6Ресурсы из шахты &6■"
+    display_name: "&6■ &fCategory: &6Resources from the mine &6■"
     click_commands:
       - '[open_menu] mine'
 
   menuMobs:
     material: COW_SPAWN_EGG
     slot: 5
-    display_name: "&6■ &fКатегория: &6Ресурсы с мобов &6■"
+    display_name: "&6■ &fCategory: &6Resources from mobs &6■"
     click_commands:
       - '[open_menu] mobs'
 
   back:
     material: ARROW
     slot: 49
-    display_name: "&6Вернуться"
+    display_name: "&6Back"
     click_commands:
       - '[open_menu] seller'
 
   autobuy:
     material: SLIME_BALL
     slot: 4
-    display_name: '&7Авто скупка'
+    display_name: '&7Auto buy'
     lore:
       - '&r '
-      - '&r &fНажмите чтобы включить/выключить авто скупку'
-      - '&r &fСейчас: %global_auto_sell_toggle_state%'
+      - '&r &fClick to enable/disable auto buy'
+      - '&r &fStatus: %global_auto_sell_toggle_state%'
       - '&r '
     click_commands:
       - '[AUTOBUY_STATUS_TOGGLE]'
@@ -71,14 +71,14 @@ Items:
   disable:
     material: GRAY_DYE
     slot: 45
-    display_name: '&cВыключить всё'
+    display_name: '&cDisable all'
     click_commands:
       - '[DISABLE_ALL]'
 
   enable:
     material: LIME_DYE
     slot: 53
-    display_name: '&aВключить всё'
+    display_name: '&aEnable all'
     click_commands:
       - '[ENABLE_ALL]'
 

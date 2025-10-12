@@ -13,5 +13,4 @@ public record Menu(
         String permission,
         List<String> openCommands,
         List<Button> buttons
-
 ) { }

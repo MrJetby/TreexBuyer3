@@ -1,6 +1,6 @@
 id: mobs
 
-title: "Ресурсы с мобов"
+title: "&0Resources from mobs"
 
 open_permission: none
 size: 54
@@ -20,11 +20,11 @@ Items:
       - 18-35
     category: mobs
     lore:
-      - ' &fИзначальная Цена &a&l$%price% '
-      - ' &fТекущая Цена &c&l$%price_with_coefficient%'
+      - ' &fOriginal Price &a&l$%price% '
+      - ' &fCurrent Price &c&l$%price_with_coefficient%'
       - ''
-      - ' &7Кликните чтобы переключить авто скупку'
-      - ' &7Сейчас %auto_sell_toggle_state%'
+      - ' &7Click to toggle auto buy'
+      - ' &7Status %auto_sell_toggle_state%'
       - ''
     click_commands:
       - '[AUTOBUY_ITEM_TOGGLE]'
@@ -33,7 +33,7 @@ Items:
   menuMine:
     material: NETHERITE_INGOT
     slot: 3
-    display_name: "&6■ &fКатегория: &6Ресурсы из шахты &6■"
+    display_name: "&6■ &fCategory: &6Resources from the mine &6■"
     click_commands:
       - '[open_menu] mine'
 
@@ -41,14 +41,14 @@ Items:
     material: COW_SPAWN_EGG
     enchanted: true
     slot: 5
-    display_name: "&6■ &fКатегория: &6Ресурсы с мобов &6■"
+    display_name: "&6■ &fCategory: &6Resources from mobs &6■"
     click_commands:
       - '[open_menu] mobs'
 
   back:
     material: ARROW
     slot: 53
-    display_name: "&6Вернуться"
+    display_name: "&6Back"
     click_commands:
       - '[open_menu] seller'
 

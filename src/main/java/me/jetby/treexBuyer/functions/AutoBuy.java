@@ -5,7 +5,6 @@ import me.jetby.treexBuyer.Main;
 import me.jetby.treexBuyer.configurations.Items;
 import me.jetby.treexBuyer.menus.commands.ActionExecutor;
 import me.jetby.treexBuyer.menus.commands.ActionRegistry;
-import me.jetby.treexBuyer.tools.Logger;
 import me.jetby.treexBuyer.tools.NumberUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
@@ -39,9 +38,7 @@ public class AutoBuy {
                 if (!plugin.getStorage().getAutoBuyStatus(player.getUniqueId())) continue;
 
                 checkItems(player);
-
             }
-
 
         }, 0L, plugin.getCfg().getAutoBuyDelay());
     }
@@ -75,7 +72,7 @@ public class AutoBuy {
             int score = itemData.score() * itemStack.getAmount();
 
 
-            if (player.getEquipment().getHelmet() !=null && player.getEquipment().getItemInOffHand().equals(itemStack)) {
+            if (player.getEquipment().getItemInOffHand() != null && player.getEquipment().getItemInOffHand().equals(itemStack)) {
                 player.getEquipment().setItemInOffHand(air);
             }
             if (player.getEquipment().getHelmet() != null && player.getEquipment().getHelmet().equals(itemStack)) {
@@ -96,7 +93,7 @@ public class AutoBuy {
             totalPrice += price * itemStack.getAmount();
 
             if (score > 0) {
-                totalScores+= score;
+                totalScores += score;
                 String key = plugin.getCoefficient().determineKey(itemStack.getType());
                 plugin.getStorage().setScore(player.getUniqueId(), key, plugin.getStorage().getScore(player.getUniqueId(), key) + score);
             }

@@ -15,7 +15,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @RequiredArgsConstructor
 public class Yaml implements Storage {
     final Main plugin;
-    final Map<UUID, PlayerData> cache = new ConcurrentHashMap<>( );
+    final Map<UUID, PlayerData> cache = new ConcurrentHashMap<>();
     final FileConfiguration configuration = FileLoader.getFileConfiguration("storage.yml");
 
     @Override
@@ -98,13 +98,13 @@ public class Yaml implements Storage {
 
     @Override
     public void setScore(UUID uuid, String key, int score) {
-            PlayerData data = cache.computeIfAbsent(uuid, k -> new PlayerData());
-            data.scores.put(key.toLowerCase(), score);
-            if (plugin.getCfg().isYamlOrJsonForceSave()) {
-                if (!save()) {
-                    Logger.error("Failed to save autoBuyItems for UUID: " + uuid);
-                }
+        PlayerData data = cache.computeIfAbsent(uuid, k -> new PlayerData());
+        data.scores.put(key.toLowerCase(), score);
+        if (plugin.getCfg().isYamlOrJsonForceSave()) {
+            if (!save()) {
+                Logger.error("Failed to save autoBuyItems for UUID: " + uuid);
             }
+        }
 
     }
 
@@ -116,13 +116,13 @@ public class Yaml implements Storage {
 
     @Override
     public void setAutoBuyItems(UUID uuid, List<String> items) {
-            PlayerData data = cache.computeIfAbsent(uuid, k -> new PlayerData());
-            data.autoBuyItems = new ArrayList<>(items);
-            if (plugin.getCfg().isYamlOrJsonForceSave()) {
-                if (!save()) {
-                    Logger.error("Failed to save autoBuyItems for UUID: " + uuid);
-                }
+        PlayerData data = cache.computeIfAbsent(uuid, k -> new PlayerData());
+        data.autoBuyItems = new ArrayList<>(items);
+        if (plugin.getCfg().isYamlOrJsonForceSave()) {
+            if (!save()) {
+                Logger.error("Failed to save autoBuyItems for UUID: " + uuid);
             }
+        }
     }
 
     @Override
@@ -150,6 +150,7 @@ public class Yaml implements Storage {
         PlayerData data = cache.getOrDefault(uuid, new PlayerData());
         return data.autoBuy;
     }
+
     @Override
     public String getTopName(int number) {
         if (cache.isEmpty()) return null;
@@ -176,7 +177,7 @@ public class Yaml implements Storage {
                     int sumB = b.getValue().scores.values().stream().mapToInt(Integer::intValue).sum();
                     return Integer.compare(sumB, sumA);
                 })
-                .toList( );
+                .toList();
 
         if (number <= 0 || number > sorted.size()) return 0;
 
@@ -190,7 +191,7 @@ public class Yaml implements Storage {
 
     private String getName(UUID uuid) {
         OfflinePlayer player = Bukkit.getOfflinePlayer(uuid);
-        return player != null ? player.getName() : null;
+        return player.getName();
     }
 }
 

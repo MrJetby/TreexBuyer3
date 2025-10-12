@@ -7,14 +7,16 @@ import org.bukkit.OfflinePlayer;
 
 import java.sql.*;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Consumer;
 
 public class SQL implements Storage {
     private final Main plugin;
 
     private final boolean mySql;
     private final Connection connection;
-    private final Map<UUID, PlayerData> cache = new ConcurrentHashMap<>( );
+    private final Map<UUID, PlayerData> cache = new ConcurrentHashMap<>();
 
     private static final String CREATE_PLAYERS_TABLE = "CREATE TABLE IF NOT EXISTS players (uuid TEXT NOT NULL, autoBuy BOOLEAN DEFAULT false, autoBuyItems TEXT DEFAULT '', PRIMARY KEY (uuid));";
     private static final String CREATE_SCORES_TABLE = "CREATE TABLE IF NOT EXISTS player_scores (uuid TEXT NOT NULL, score_key TEXT NOT NULL, value INTEGER DEFAULT 0, PRIMARY KEY (uuid, score_key));";
@@ -33,20 +35,20 @@ public class SQL implements Storage {
     public SQL(Main plugin) {
         this.plugin = plugin;
 
-        this.mySql = plugin.getCfg( ).getStorageType( ).equalsIgnoreCase("MYSQL".toUpperCase( ));
+        this.mySql = plugin.getCfg().getStorageType().equalsIgnoreCase("MYSQL".toUpperCase());
 
-        this.mysqlHost = plugin.getCfg( ).getHost( );
-        this.mysqlPort = plugin.getCfg( ).getPort( );
-        this.mysqlDatabase = plugin.getCfg( ).getDatabase( );
-        this.mysqlUser = plugin.getCfg( ).getUsername( );
-        this.mysqlPassword = plugin.getCfg( ).getPassword( );
+        this.mysqlHost = plugin.getCfg().getHost();
+        this.mysqlPort = plugin.getCfg().getPort();
+        this.mysqlDatabase = plugin.getCfg().getDatabase();
+        this.mysqlUser = plugin.getCfg().getUsername();
+        this.mysqlPassword = plugin.getCfg().getPassword();
 
         this.connection = connect();
     }
 
     public void closeConnection() {
         try {
-            connection.close( );
+            connection.close();
         } catch (SQLException e) {
             Logger.error("Connection close was failed: " + e);
         }
@@ -63,11 +65,12 @@ public class SQL implements Storage {
                 return DriverManager.getConnection(
                         "jdbc:mysql://" + mysqlHost + ":" + mysqlPort + "/" + mysqlDatabase + "?useSSL=false",
                         mysqlUser, mysqlPassword);
+
             } else {
-                return DriverManager.getConnection("jdbc:sqlite:" + plugin.getDataFolder( ) + "/storage.db");
+                return DriverManager.getConnection("jdbc:sqlite:" + plugin.getDataFolder() + "/storage.db");
             }
         } catch (SQLException e) {
-            Logger.error(""+e);
+            Logger.error("" + e);
         }
 
         return null;
@@ -75,36 +78,35 @@ public class SQL implements Storage {
 
     @Override
     public boolean load() {
-        boolean status = false;
-        if (connection!=null) {
-            createTables( );
-            loadCacheAsync( );
-            status = true;
+        if (connection != null) {
+            createTables();
+            loadCacheAsync();
+            return true;
         }
-        return status;
+        return false;
     }
 
 
     private void createTables() {
-        try (Statement statement = connection.createStatement( )) {
+        try (Statement statement = connection.createStatement()) {
             statement.execute(CREATE_PLAYERS_TABLE);
             statement.execute(CREATE_SCORES_TABLE);
             Logger.success("Players and scores tables were created successfully or already exist.");
         } catch (SQLException e) {
-            Logger.error("Error creating tables: " + e.getMessage( ));
+            Logger.error("Error creating tables: " + e.getMessage());
         }
     }
 
     private void loadCacheAsync() {
-        Bukkit.getScheduler( ).runTaskAsynchronously(plugin, () -> {
-            long start = System.currentTimeMillis( );
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+            long start = System.currentTimeMillis();
             try (PreparedStatement psPlayers = connection.prepareStatement(GET_ALL_PLAYERS);
-                 ResultSet rsPlayers = psPlayers.executeQuery( )) {
-                while (rsPlayers.next( )) {
+                 ResultSet rsPlayers = psPlayers.executeQuery()) {
+                while (rsPlayers.next()) {
                     UUID uuid = UUID.fromString(rsPlayers.getString("uuid"));
                     boolean autoBuy = rsPlayers.getBoolean("autoBuy");
                     String itemsStr = rsPlayers.getString("autoBuyItems");
-                    List<String> items = itemsStr == null || itemsStr.isEmpty( ) ? new ArrayList<>( ) : Arrays.asList(itemsStr.split(","));
+                    List<String> items = itemsStr == null || itemsStr.isEmpty() ? new ArrayList<>() : Arrays.asList(itemsStr.split(","));
 
                     Map<String, Integer> scores = new HashMap<>();
                     try (PreparedStatement psScores = connection.prepareStatement(GET_SCORES_FOR_UUID)) {
@@ -120,30 +122,35 @@ public class SQL implements Storage {
 
                     cache.put(uuid, new PlayerData(autoBuy, items, scores));
                 }
-                Logger.success("Data from the database was loaded in " + (System.currentTimeMillis( ) - start) + " ms");
+                Logger.success("Data from the database was loaded in " + (System.currentTimeMillis() - start) + " ms");
             } catch (SQLException e) {
-                Logger.error("Error loading cache: " + e.getMessage( ));
+                Logger.error("Error loading cache: " + e.getMessage());
             }
         });
     }
 
+
     @Override
     public boolean save() {
         boolean status = false;
+        if (connection == null) return status;
+        boolean oldAuto = false;
         try {
+            oldAuto = connection.getAutoCommit();
+            connection.setAutoCommit(false);
             try (PreparedStatement psPlayer = connection.prepareStatement(INSERT_PLAYER);
                  PreparedStatement psScore = connection.prepareStatement(INSERT_SCORE)) {
-                for (Map.Entry<UUID, PlayerData> entry : cache.entrySet( )) {
-                    UUID uuid = entry.getKey( );
-                    PlayerData data = entry.getValue( );
+                for (Map.Entry<UUID, PlayerData> entry : cache.entrySet()) {
+                    UUID uuid = entry.getKey();
+                    PlayerData data = entry.getValue();
                     String itemsStr = String.join(",", data.autoBuyItems);
 
-                    psPlayer.setString(1, uuid.toString( ));
+                    psPlayer.setString(1, uuid.toString());
                     psPlayer.setBoolean(2, data.autoBuy);
                     psPlayer.setString(3, itemsStr);
                     psPlayer.setBoolean(4, data.autoBuy);
                     psPlayer.setString(5, itemsStr);
-                    psPlayer.addBatch( );
+                    psPlayer.addBatch();
 
                     for (Map.Entry<String, Integer> scoreEntry : data.scores.entrySet()) {
                         psScore.setString(1, uuid.toString());
@@ -153,24 +160,29 @@ public class SQL implements Storage {
                         psScore.addBatch();
                     }
                 }
-                psPlayer.executeBatch( );
-                psScore.executeBatch( );
+                psPlayer.executeBatch();
+                psScore.executeBatch();
             }
 
-            connection.commit( );
+            connection.commit();
             status = true;
             Logger.success("Cache saved to DB.");
         } catch (SQLException e) {
-            Logger.error("Error saving cache: " + e.getMessage( ));
+            Logger.error("Error saving cache: " + e.getMessage());
             try {
-                connection.rollback( );
+                connection.rollback();
             } catch (SQLException ex) {
-                Logger.error("Transaction rollback error: " + ex.getMessage( ));
+                Logger.error("Transaction rollback error: " + ex.getMessage());
+            } finally {
+                try {
+                    connection.setAutoCommit(oldAuto);
+                } catch (SQLException ignore) {
+                }
             }
         }
 
-        closeConnection( );
-        cache.clear( );
+        closeConnection();
+        cache.clear();
         return status;
     }
 
@@ -186,54 +198,54 @@ public class SQL implements Storage {
 
     @Override
     public void setScore(UUID uuid, String key, int score) {
-        PlayerData data = cache.computeIfAbsent(uuid, k -> new PlayerData( ));
+        PlayerData data = cache.computeIfAbsent(uuid, k -> new PlayerData());
         data.scores.put(key.toLowerCase(), score);
         scheduleAsyncUpdate(uuid, data);
     }
 
     @Override
     public int getScore(UUID uuid, String key) {
-        PlayerData data = cache.computeIfAbsent(uuid, k -> new PlayerData( ));
+        PlayerData data = cache.computeIfAbsent(uuid, k -> new PlayerData());
         return data.scores.getOrDefault(key.toLowerCase(), 0);
     }
 
     @Override
     public void setAutoBuyItems(UUID uuid, List<String> items) {
-        PlayerData data = cache.computeIfAbsent(uuid, k -> new PlayerData( ));
+        PlayerData data = cache.computeIfAbsent(uuid, k -> new PlayerData());
         data.autoBuyItems = new ArrayList<>(items);
         scheduleAsyncUpdate(uuid, data);
     }
 
     @Override
     public List<String> getAutoBuyItems(UUID uuid) {
-        PlayerData data = cache.computeIfAbsent(uuid, k -> new PlayerData( ));
+        PlayerData data = cache.computeIfAbsent(uuid, k -> new PlayerData());
         return new ArrayList<>(data.autoBuyItems);
     }
 
     @Override
     public void setAutoBuyStatus(UUID uuid, boolean status) {
-        PlayerData data = cache.computeIfAbsent(uuid, k -> new PlayerData( ));
+        PlayerData data = cache.computeIfAbsent(uuid, k -> new PlayerData());
         data.autoBuy = status;
         scheduleAsyncUpdate(uuid, data);
     }
 
     @Override
     public boolean getAutoBuyStatus(UUID uuid) {
-        PlayerData data = cache.computeIfAbsent(uuid, k -> new PlayerData( ));
+        PlayerData data = cache.computeIfAbsent(uuid, k -> new PlayerData());
         return data.autoBuy;
     }
 
     private void scheduleAsyncUpdate(UUID uuid, PlayerData data) {
-        Bukkit.getScheduler( ).runTaskAsynchronously(plugin, () -> {
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
             String itemsStr = String.join(",", data.autoBuyItems);
             try {
                 try (PreparedStatement psPlayer = connection.prepareStatement(INSERT_PLAYER)) {
-                    psPlayer.setString(1, uuid.toString( ));
+                    psPlayer.setString(1, uuid.toString());
                     psPlayer.setBoolean(2, data.autoBuy);
                     psPlayer.setString(3, itemsStr);
                     psPlayer.setBoolean(4, data.autoBuy);
                     psPlayer.setString(5, itemsStr);
-                    psPlayer.executeUpdate( );
+                    psPlayer.executeUpdate();
                 }
 
                 try (PreparedStatement psScore = connection.prepareStatement(INSERT_SCORE)) {
@@ -247,7 +259,7 @@ public class SQL implements Storage {
                     psScore.executeBatch();
                 }
             } catch (SQLException e) {
-                Logger.error("Error updating player " + uuid + ": " + e.getMessage( ));
+                Logger.error("Error updating player " + uuid + ": " + e.getMessage());
             }
         });
     }
@@ -275,6 +287,6 @@ public class SQL implements Storage {
 
     private String getName(UUID uuid) {
         OfflinePlayer player = Bukkit.getOfflinePlayer(uuid);
-        return player != null ? player.getName() : null;
+        return player.getName();
     }
 }

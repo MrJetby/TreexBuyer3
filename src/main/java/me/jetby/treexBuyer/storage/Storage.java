@@ -2,6 +2,7 @@ package me.jetby.treexBuyer.storage;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 public interface Storage {
 
@@ -28,4 +29,6 @@ public interface Storage {
     String getTopName(int number);
 
     int getTopScore(int number);
+
+
 }

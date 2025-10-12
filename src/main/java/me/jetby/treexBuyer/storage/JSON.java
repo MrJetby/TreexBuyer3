@@ -132,13 +132,13 @@ public class JSON implements Storage {
 
     @Override
     public void setScore(UUID uuid, String key, int score) {
-            PlayerData data = cache.computeIfAbsent(uuid, k -> new PlayerData());
-            data.scores.put(key.toLowerCase(), score);
-            if (plugin.getCfg().isYamlOrJsonForceSave()) {
-                if (!save()) {
-                    Logger.error("Failed to save autoBuyItems for UUID: " + uuid);
-                }
+        PlayerData data = cache.computeIfAbsent(uuid, k -> new PlayerData());
+        data.scores.put(key.toLowerCase(), score);
+        if (plugin.getCfg().isYamlOrJsonForceSave()) {
+            if (!save()) {
+                Logger.error("Failed to save autoBuyItems for UUID: " + uuid);
             }
+        }
     }
 
     @Override
@@ -150,13 +150,13 @@ public class JSON implements Storage {
     @Override
     public void setAutoBuyItems(UUID uuid, List<String> items) {
 
-            PlayerData data = cache.computeIfAbsent(uuid, k -> new PlayerData());
-            data.autoBuyItems = new ArrayList<>(items);
-            if (plugin.getCfg().isYamlOrJsonForceSave()) {
-                if (!save()) {
-                    Logger.error("Failed to save autoBuyItems for UUID: " + uuid);
-                }
+        PlayerData data = cache.computeIfAbsent(uuid, k -> new PlayerData());
+        data.autoBuyItems = new ArrayList<>(items);
+        if (plugin.getCfg().isYamlOrJsonForceSave()) {
+            if (!save()) {
+                Logger.error("Failed to save autoBuyItems for UUID: " + uuid);
             }
+        }
     }
 
     @Override
@@ -168,13 +168,13 @@ public class JSON implements Storage {
     @Override
     public void setAutoBuyStatus(UUID uuid, boolean status) {
 
-            PlayerData data = cache.computeIfAbsent(uuid, k -> new PlayerData());
-            data.autoBuy = status;
-            if (plugin.getCfg().isYamlOrJsonForceSave()) {
-                if (!save()) {
-                    Logger.error("Failed to save autoBuyItems for UUID: " + uuid);
-                }
+        PlayerData data = cache.computeIfAbsent(uuid, k -> new PlayerData());
+        data.autoBuy = status;
+        if (plugin.getCfg().isYamlOrJsonForceSave()) {
+            if (!save()) {
+                Logger.error("Failed to save autoBuyItems for UUID: " + uuid);
             }
+        }
     }
 
     @Override
@@ -182,6 +182,7 @@ public class JSON implements Storage {
         PlayerData data = cache.getOrDefault(uuid, new PlayerData());
         return data.autoBuy;
     }
+
     @Override
     public String getTopName(int number) {
         if (cache.isEmpty()) return null;
@@ -208,7 +209,7 @@ public class JSON implements Storage {
                     int sumB = b.getValue().scores.values().stream().mapToInt(Integer::intValue).sum();
                     return Integer.compare(sumB, sumA);
                 })
-                .toList( );
+                .toList();
 
         if (number <= 0 || number > sorted.size()) return 0;
 
@@ -222,7 +223,7 @@ public class JSON implements Storage {
 
     private String getName(UUID uuid) {
         OfflinePlayer player = Bukkit.getOfflinePlayer(uuid);
-        return player != null ? player.getName() : null;
+        return player.getName();
     }
 
 

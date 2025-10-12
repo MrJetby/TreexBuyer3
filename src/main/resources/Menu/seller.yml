@@ -1,50 +1,50 @@
 ####################################################################################################
 #
-# Все команды
+# All commands
 #
-# [MESSAGE] Отправить игроку сообщение
+# [MESSAGE] Send a message to a player
 #
-# [BROADCAST_MESSAGE] Отправить всем сообщение
+# [BROADCAST_MESSAGE] Send a message to everyone
 #
-# [PLAYER] Выполнить команду от имени игрока
+# [PLAYER] Execute a command as the player
 #
-# [CONSOLE] Выполнять команду от имени консоли
+# [CONSOLE] Execute a command as the console
 #
-# [ACTIONBAR] Отправить игроку текст в actionbar
+# [ACTIONBAR] Send text to a player's actionbar
 #
-# [BROADCAST_ACTIONBAR] Отправить всем текст в actionbar
+# [BROADCAST_ACTIONBAR] Send text to everyone's actionbar
 #
-# [SOUND] Произвести игроку звук
+# [SOUND] Play a sound for a player
 #
-# [BROADCAST_SOUND] Произвести всем звук
+# [BROADCAST_SOUND] Play a sound for everyone
 #
-# [EFFECT] Дать игроку эффект
+# [EFFECT] Give a player an effect
 #
-# [TITLE] Отправить игроку тайтл, чтобы отправить субтайтл используйте символ ";"
-# Например: [TITLE] First;Second
+# [TITLE] Send a title to a player; to send a subtitle, use the ";" symbol
+# Example: [TITLE] First;Second
 #
-# [BROADCAST_TITLE] Отправить всем тайтл
+# [BROADCAST_TITLE] Send a title to everyone
 #
-# [CLOSE] Закрыть меню
+# [CLOSE] Close the menu
 #
-# [OPEN] Открыть меню
+# [OPEN] Open the menu
 #
-# [AUTOBUY_ITEM_TOGGLE] Переключить предмет из списка предметов авто-скупки
+# [AUTOBUY_ITEM_TOGGLE] Toggle an item in the autobuy items list
 #
-# [AUTOBUY_STATUS_TOGGLE] Переключить статус авто-скупки
+# [AUTOBUY_STATUS_TOGGLE] Toggle the autobuy status
 #
-# [ENABLE_ALL] Добавить все предметы у которых в текущем гуи есть команда [AUTOBUY_ITEM_TOGGLE] в список предметов авто-скупки
+# [ENABLE_ALL] Add all items that have the [AUTOBUY_ITEM_TOGGLE] command in the current GUI to the autobuy list
 #
-# [DISABLE_ALL] Убрать все предметы у которых в текущем гуи есть есть команда [AUTOBUY_ITEM_TOGGLE] из списка предметов авто-скупки
+# [DISABLE_ALL] Remove all items that have the [AUTOBUY_ITEM_TOGGLE] command in the current GUI from the autobuy list
 #
 # [SELL_ITEM] <amount>/all
-# Также можно использовать плейсхолдер %item_amount% в проверках _requirements
+# You can also use the placeholder %item_amount% in _requirements checks
 #
-# [SELL_ALL] Продать все предметы из sell-zone
+# [SELL_ALL] Sell all items from the sell-zone
 #
 ####################################################################################################
 #
-# Типы кликов
+# Click types
 #
 # left_click_commands
 # right_click_commands
@@ -53,7 +53,7 @@
 # click_commands
 # drop_commands
 #
-# Типы проверок
+# Requirement types
 #
 # left_click_requirements
 # right_click_requirements
@@ -66,7 +66,7 @@
 #
 ####################################################################################################
 #
-# Внутренние плейсхолдеры:
+# Internal placeholders:
 #
 # %price%
 # %price_commas%
@@ -83,7 +83,6 @@
 # %global_auto_sell_toggle_state%
 #
 ####################################################################################################
-
 
 id: seller
 

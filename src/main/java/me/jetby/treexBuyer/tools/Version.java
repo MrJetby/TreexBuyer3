@@ -20,6 +20,10 @@ public class Version implements Listener {
     private final String UPDATE = "https://raw.githubusercontent.com/MrJetby/TreexBuyer3/refs/heads/master/UPDATE_LINK";
 
 
+    private final String NAME = "TreexBuyer";
+    private final String COLOR = "§6";
+
+
     @EventHandler
     public void onJoin(PlayerJoinEvent e) {
         Player player = e.getPlayer();
@@ -37,20 +41,20 @@ public class Version implements Listener {
     public List<String> getAlert() {
         List<String> oldVersion = new ArrayList<>(List.of(
                 "",
-                "§7-------- §6TreexBuyer §7--------",
-                "§6● §fAttention, update available, please update the plugin.",
-                "§6● §7Your version: §c" + getVersion() + " §7а latest §a" + getLastVersion(),
+                "§7-------- "+COLOR+NAME+" §7--------",
+                COLOR+"● §fAttention, update available, please update the plugin.",
+                COLOR+"● §7Your version: §c" + getVersion() + " §7а latest §a" + getLastVersion(),
                 "",
-                "§6● §fDownload here: §b" + getUPDATE(),
+                COLOR+"● §fDownload here: §b" + getUPDATE(),
                 "§7------------------------",
                 ""
         ));
         List<String> lastVersion = new ArrayList<>(List.of(
                 "",
-                "§7-------- §6TreexBuyer §7--------",
-                "§6● §7Plugin version: §a" + getVersion(),
+                "§7-------- "+COLOR+NAME+" §7--------",
+                COLOR+"● §7Plugin version: §a" + getVersion(),
                 "",
-                "§6● §aYou are using the latest version ✔",
+                COLOR+"● §aYou are using the latest version ✔",
                 "",
                 "§7------------------------",
                 ""

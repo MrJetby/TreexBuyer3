@@ -12,7 +12,7 @@ categories:
     - LAPIS_LAZULI
     - COAL
     - QUARTZ
-  mob_drops:
+  mobs:
     - BONE
     - LEATHER
     - STRING

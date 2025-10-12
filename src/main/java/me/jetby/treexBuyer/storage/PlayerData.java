@@ -6,9 +6,9 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class PlayerData {
-    boolean autoBuy = false;
-    List<String> autoBuyItems = new ArrayList<>( );
-    Map<String, Integer> scores = new ConcurrentHashMap<>();
+    public boolean autoBuy = false;
+    public List<String> autoBuyItems = new ArrayList<>();
+    public Map<String, Integer> scores = new ConcurrentHashMap<>();
 
     PlayerData(boolean autoBuy, List<String> autoBuyItems, Map<String, Integer> scores) {
         this.autoBuy = autoBuy;

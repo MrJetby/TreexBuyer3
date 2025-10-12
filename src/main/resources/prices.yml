@@ -1,6 +1,6 @@
 
 
-# Категории:
+# Categories:
 categories:
   mine:
     - NETHERITE_INGOT
@@ -12,13 +12,13 @@ categories:
     - LAPIS_LAZULI
     - COAL
     - QUARTZ
-  mob_drops:
+  mobs:
     - BONE
     - LEATHER
     - STRING
     - SPIDER_EYE
 
-# Обычная стоимость предметов
+# Item price
 NETHERITE_INGOT:
   price: 10000
   add-scores: 250
