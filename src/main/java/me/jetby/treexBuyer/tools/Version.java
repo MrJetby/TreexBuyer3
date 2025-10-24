@@ -19,10 +19,8 @@ public class Version implements Listener {
     private final String VERSION = "https://raw.githubusercontent.com/MrJetby/TreexBuyer3/refs/heads/master/VERSION";
     private final String UPDATE = "https://raw.githubusercontent.com/MrJetby/TreexBuyer3/refs/heads/master/UPDATE_LINK";
 
-
     private final String NAME = "TreexBuyer";
     private final String COLOR = "§6";
-
 
     @EventHandler
     public void onJoin(PlayerJoinEvent e) {
@@ -35,7 +33,6 @@ public class Version implements Listener {
             }
         }
     }
-
 
 
     public List<String> getAlert() {

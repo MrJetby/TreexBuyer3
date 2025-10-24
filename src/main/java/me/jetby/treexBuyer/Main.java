@@ -112,15 +112,13 @@ public final class Main extends JavaPlugin {
         storage.load();
     }
 
-    private boolean setupPlaceholders() {
+    private void setupPlaceholders() {
         if (getServer().getPluginManager().getPlugin("PlaceholderAPI") == null) {
             Logger.warn("PlaceholderAPI not found. Placeholders are not being working");
-            return false;
         } else {
             treexBuyerPlaceholders = new TreexBuyerPlaceholders(this);
             treexBuyerPlaceholders.register();
         }
-        return true;
     }
     private boolean setupEconomy() {
         if (getServer().getPluginManager().getPlugin("Vault") == null) {

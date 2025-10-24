@@ -15,7 +15,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @RequiredArgsConstructor
 public class Yaml implements Storage {
     final Main plugin;
-    final Map<UUID, PlayerData> cache = new ConcurrentHashMap<>();
+    final Map<UUID, PlayerData> cache = new ConcurrentHashMap<>( );
     final FileConfiguration configuration = FileLoader.getFileConfiguration("storage.yml");
 
     @Override
@@ -150,7 +150,6 @@ public class Yaml implements Storage {
         PlayerData data = cache.getOrDefault(uuid, new PlayerData());
         return data.autoBuy;
     }
-
     @Override
     public String getTopName(int number) {
         if (cache.isEmpty()) return null;
@@ -177,7 +176,7 @@ public class Yaml implements Storage {
                     int sumB = b.getValue().scores.values().stream().mapToInt(Integer::intValue).sum();
                     return Integer.compare(sumB, sumA);
                 })
-                .toList();
+                .toList( );
 
         if (number <= 0 || number > sorted.size()) return 0;
 

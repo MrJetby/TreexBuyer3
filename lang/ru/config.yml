@@ -1,6 +1,6 @@
 storage:
   # YAML, MYSQL, SQLITE, JSON
-  type: "SQLITE"
+  type: "YAML"
   #
   # Если type установлен на YAML или JSON
   #

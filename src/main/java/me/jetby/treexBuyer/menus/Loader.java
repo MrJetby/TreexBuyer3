@@ -3,7 +3,6 @@ package me.jetby.treexBuyer.menus;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import me.jetby.treexBuyer.Main;
-import me.jetby.treexBuyer.configurations.Items;
 import me.jetby.treexBuyer.menus.commands.Command;
 import me.jetby.treexBuyer.menus.requirements.ClickRequirement;
 import me.jetby.treexBuyer.menus.requirements.ViewRequirement;
@@ -32,12 +31,9 @@ public class Loader {
     private final Main plugin;
     private final File file;
 
-    int amount = 0;
-
     public void load() {
 
         menus.clear();
-        amount = 0;
 
         File folder = new File(file, "Menu");
 
@@ -69,7 +65,7 @@ public class Loader {
             }
         }
         Logger.success("------------------------");
-        Logger.success(amount+" menus has been founded");
+        Logger.success(menus.size()+" menus has been founded");
         Logger.success("------------------------");
     }
 
@@ -90,7 +86,6 @@ public class Loader {
             List<String> openCommands = config.getStringList("open_commands");
             List<Button> buttons = loadButtons(config);
 
-            amount++;
             menus.put(menuId, new Menu(menuId, title, type, size, inventoryType, permission, openCommands, buttons));
         } catch (Exception e) {
             Logger.error("Error trying to load menu: "+e.getMessage());
@@ -145,9 +140,9 @@ public class Loader {
                             if (a==items.size()) break;
 
                             Material mat = items.get(a);
-                                buttons.add(new Button(key, displayName, lore, slot, amount, customModelData, enchanted, sellZone, category, new ItemStack(mat),
-                                        requirements(itemSection),
-                                        loadCommands(itemSection)));
+                            buttons.add(new Button(key, displayName, lore, slot, amount, customModelData, enchanted, sellZone, category, new ItemStack(mat),
+                                    requirements(itemSection),
+                                    loadCommands(itemSection)));
                             a++;
                         } else {
                             buttons.add(new Button(key, displayName, lore, slot, amount, customModelData, enchanted, sellZone, null, itemStack,

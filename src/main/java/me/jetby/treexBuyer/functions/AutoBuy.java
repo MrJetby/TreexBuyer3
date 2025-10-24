@@ -47,7 +47,7 @@ public class AutoBuy {
         Bukkit.getScheduler().cancelTask(task);
     }
 
-    ItemStack air = new ItemStack(Material.AIR);
+    private static final ItemStack air = new ItemStack(Material.AIR);
 
     public void checkItems(Player player) {
 
@@ -107,7 +107,6 @@ public class AutoBuy {
 
 
     }
-
     @NotNull List<String> getStrings(double totalPrice, int totalScores) {
         List<String> list = new ArrayList<>(plugin.getCfg().getAutoBuyActions());
 
